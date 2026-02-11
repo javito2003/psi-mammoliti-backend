@@ -73,7 +73,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const userId = request.user!.userId as string;
+    const userId = request.user!.id as string;
     await this.logoutUserUseCase.execute(userId);
 
     response.clearCookie(COOKIE_NAME.ACCESS);

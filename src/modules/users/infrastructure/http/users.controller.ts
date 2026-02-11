@@ -18,7 +18,8 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   async getMe(@Req() request: Request) {
-    const userId = request.user!.userId;
+    const userId = request.user!['id'] as string;
+    console.log('Getting profile for user ID:', userId);
     return this.getUserProfileUseCase.execute(userId);
   }
 }

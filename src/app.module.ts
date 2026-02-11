@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/infrastructure/users.module';
 import { AuthModule } from './modules/auth/infrastructure/auth.module';
+import { ProfessionalsModule } from './modules/professionals/infrastructure/professionals.module';
+import { ThemesModule } from './modules/themes/infrastructure/themes.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/shared/infrastructure/database/database.module';
 import databaseConfig from './modules/shared/infrastructure/database/database.config';
@@ -11,6 +13,8 @@ import databaseConfig from './modules/shared/infrastructure/database/database.co
   imports: [
     UsersModule,
     AuthModule,
+    ProfessionalsModule,
+    ThemesModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig],
