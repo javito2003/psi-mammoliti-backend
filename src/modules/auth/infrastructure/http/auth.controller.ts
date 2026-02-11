@@ -17,6 +17,7 @@ import { RegisterUserUseCase } from '../../application/use-cases/register-user.u
 import { RefreshAccessTokenUseCase } from '../../application/use-cases/refresh-access-token.use-case';
 import { LogoutUserUseCase } from '../../application/use-cases/logout-user.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { UserId } from 'src/modules/shared/infrastructure/decorators/user-id.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -70,10 +71,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   async logout(
-    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
+    @UserId() userId: string,
   ) {
-    const userId = request.user!.id as string;
     await this.logoutUserUseCase.execute(userId);
 
     response.clearCookie(COOKIE_NAME.ACCESS);

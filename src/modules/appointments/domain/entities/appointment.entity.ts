@@ -14,6 +14,8 @@ export class AppointmentEntity {
   status: AppointmentStatus;
   createdAt: Date;
   updatedAt: Date;
+  professionalFirstName?: string;
+  professionalLastName?: string;
 
   constructor(partial: Partial<AppointmentEntity>) {
     Object.assign(this, partial);

@@ -32,6 +32,15 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
     return entities.map((e) => this.toDomain(e));
   }
 
+  async findByUserId(userId: string): Promise<AppointmentEntity[]> {
+    const entities = await this.repository.find({
+      where: { userId },
+      relations: ['professional', 'professional.user'],
+      order: { startAt: 'DESC' },
+    });
+    return entities.map((e) => this.toDomain(e));
+  }
+
   private toDomain(schema: Appointment): AppointmentEntity {
     return new AppointmentEntity({
       id: schema.id,
@@ -42,6 +51,8 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
       status: schema.status,
       createdAt: schema.createdAt,
       updatedAt: schema.updatedAt,
+      professionalFirstName: schema.professional?.user?.firstName,
+      professionalLastName: schema.professional?.user?.lastName,
     });
   }
 

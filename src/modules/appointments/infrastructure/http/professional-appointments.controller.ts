@@ -12,6 +12,7 @@ import { GetAvailableSlotsUseCase } from '../../application/use-cases/get-availa
 import { CreateAppointmentUseCase } from '../../application/use-cases/create-appointment.use-case';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import type { Request } from 'express';
+import { UserId } from 'src/modules/shared/infrastructure/decorators/user-id.decorator';
 
 @Controller('professionals')
 export class ProfessionalAppointmentsController {
@@ -37,9 +38,8 @@ export class ProfessionalAppointmentsController {
   async createAppointment(
     @Param('professionalId') professionalId: string,
     @Body() body: { startAt: string },
-    @Req() request: Request,
+    @UserId() userId: string,
   ) {
-    const userId = request.user!['id'] as string;
     return this.createAppointmentUseCase.execute(
       professionalId,
       userId,

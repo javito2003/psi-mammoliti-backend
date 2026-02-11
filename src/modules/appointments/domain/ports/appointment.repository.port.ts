@@ -9,4 +9,5 @@ export interface AppointmentRepositoryPort {
     start: Date,
     end: Date,
   ): Promise<AppointmentEntity[]>;
+  findByUserId(userId: string): Promise<AppointmentEntity[]>;
 }
