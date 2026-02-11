@@ -1,10 +1,23 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { GetAvailableSlotsUseCase } from '../../application/use-cases/get-available-slots.use-case';
+import { CreateAppointmentUseCase } from '../../application/use-cases/create-appointment.use-case';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import type { Request } from 'express';
 
 @Controller('professionals')
 export class ProfessionalAppointmentsController {
   constructor(
     private readonly getAvailableSlotsUseCase: GetAvailableSlotsUseCase,
+    private readonly createAppointmentUseCase: CreateAppointmentUseCase,
   ) {}
 
   @Get(':professionalId/appointments/availability')
@@ -17,5 +30,20 @@ export class ProfessionalAppointmentsController {
       weekStart,
     );
     return { slots };
+  }
+
+  @Post(':professionalId/appointments')
+  @UseGuards(JwtAuthGuard)
+  async createAppointment(
+    @Param('professionalId') professionalId: string,
+    @Body() body: { startAt: string },
+    @Req() request: Request,
+  ) {
+    const userId = request.user!['id'] as string;
+    return this.createAppointmentUseCase.execute(
+      professionalId,
+      userId,
+      body.startAt,
+    );
   }
 }
