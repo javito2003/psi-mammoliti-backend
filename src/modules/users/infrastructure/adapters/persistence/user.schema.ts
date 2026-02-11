@@ -17,7 +17,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   hashedRefreshToken: string | null;
 
   @Column({ type: 'timestamp' })

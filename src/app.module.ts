@@ -5,12 +5,16 @@ import { UsersModule } from './modules/users/infrastructure/users.module';
 import { AuthModule } from './modules/auth/infrastructure/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/shared/infrastructure/database/database.module';
+import databaseConfig from './modules/shared/infrastructure/database/database.config';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [databaseConfig],
+    }),
     DatabaseModule,
   ],
   controllers: [AppController],

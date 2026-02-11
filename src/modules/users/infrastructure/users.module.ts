@@ -6,11 +6,15 @@ import { OrmUserRepository } from './adapters/persistence/orm-user.repository';
 import { User } from './adapters/persistence/user.schema';
 import { PASSWORD_HASHER } from '../domain/ports/password-hasher.port';
 import { BcryptPasswordHasher } from './adapters/bcrypt-password-hasher';
+import { UsersController } from './http/users.controller';
+import { GetUserProfileUseCase } from '../application/use-cases/get-user-profile.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
+  controllers: [UsersController],
   providers: [
     UserCreator,
+    GetUserProfileUseCase,
     {
       provide: USER_REPOSITORY,
       useClass: OrmUserRepository,

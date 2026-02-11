@@ -6,7 +6,8 @@ import { UsersModule } from '../../users/infrastructure/users.module';
 import { LoginUserUseCase } from '../application/use-cases/login-user.use-case';
 import { RegisterUserUseCase } from '../application/use-cases/register-user.use-case';
 import { RefreshAccessTokenUseCase } from '../application/use-cases/refresh-access-token.use-case';
-import { AuthController } from './auth.controller';
+import { LogoutUserUseCase } from '../application/use-cases/logout-user.use-case';
+import { AuthController } from './http/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -27,6 +28,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     RegisterUserUseCase,
     LoginUserUseCase,
     RefreshAccessTokenUseCase,
+    LogoutUserUseCase,
     JwtStrategy,
   ],
 })
