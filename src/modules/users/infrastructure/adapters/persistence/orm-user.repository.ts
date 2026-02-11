@@ -17,7 +17,10 @@ export class OrmUserRepository implements UserRepositoryPort {
     return this.toDomain(savedUser);
   }
 
-  async updateRefreshToken(id: string, hashedRefreshToken: string | null): Promise<void> {
+  async updateRefreshToken(
+    id: string,
+    hashedRefreshToken: string | null,
+  ): Promise<void> {
     await this.userRepository.update(id, { hashedRefreshToken });
   }
 
