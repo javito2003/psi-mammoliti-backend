@@ -4,6 +4,10 @@ import { UserEntity } from '../../modules/users/domain/entities/user.entity';
 import { UserCreator } from '../../modules/users/domain/services/user-creator.service';
 import { ProfessionalEntity } from '../../modules/professionals/domain/entities/professional.entity';
 import {
+  AvailabilityBlock,
+  ProfessionalAvailabilityEntity,
+} from '../../modules/professionals/domain/entities/professional-availability.entity';
+import {
   PROFESSIONAL_REPOSITORY,
   type ProfessionalRepositoryPort,
 } from '../../modules/professionals/domain/ports/professional.repository.port';
@@ -30,8 +34,14 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Specialist in Anxiety and Depression with 10 years experience.',
     price: 80.0,
-    timezone: 'America/Argentina/Buenos_Aires',
+    timezone: 'UTC-5',
     themes: ['anxiety', 'depression'],
+    availability: [
+      { dayOfWeek: 1, block: AvailabilityBlock.MORNING }, // Mon Morning
+      { dayOfWeek: 1, block: AvailabilityBlock.AFTERNOON }, // Mon Afternoon
+      { dayOfWeek: 3, block: AvailabilityBlock.MORNING }, // Wed Morning
+      { dayOfWeek: 5, block: AvailabilityBlock.MORNING }, // Fri Morning
+    ],
   },
   {
     firstName: 'John',
@@ -40,8 +50,13 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Relationship counselor focusing on communication.',
     price: 100.0,
-    timezone: 'America/Argentina/Buenos_Aires',
+    timezone: 'UTC+1',
     themes: ['relationships', 'grief'],
+    availability: [
+      { dayOfWeek: 2, block: AvailabilityBlock.EVENING }, // Tue Evening
+      { dayOfWeek: 4, block: AvailabilityBlock.EVENING }, // Thu Evening
+      { dayOfWeek: 6, block: AvailabilityBlock.MORNING }, // Sat Morning
+    ],
   },
   {
     firstName: 'Sarah',
@@ -50,8 +65,15 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Trauma specialist. Helping you find your strength.',
     price: 120.0,
-    timezone: 'America/Argentina/Buenos_Aires',
+    timezone: 'UTC-8',
     themes: ['trauma', 'anxiety', 'personal-growth'],
+    availability: [
+      { dayOfWeek: 1, block: AvailabilityBlock.AFTERNOON }, // Mon Afternoon
+      { dayOfWeek: 2, block: AvailabilityBlock.AFTERNOON }, // Tue Afternoon
+      { dayOfWeek: 3, block: AvailabilityBlock.AFTERNOON }, // Wed Afternoon
+      { dayOfWeek: 4, block: AvailabilityBlock.AFTERNOON }, // Thu Afternoon
+      { dayOfWeek: 5, block: AvailabilityBlock.AFTERNOON }, // Fri Afternoon
+    ],
   },
 ];
 
@@ -120,6 +142,17 @@ export class SeedService {
           .map((slug) => savedThemes[slug])
           .filter((t) => !!t);
 
+        const availability = pData.availability.map(
+          (a) =>
+            new ProfessionalAvailabilityEntity({
+              id: uuidv4(),
+              dayOfWeek: a.dayOfWeek,
+              block: a.block,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }),
+        );
+
         const professional = new ProfessionalEntity({
           id: uuidv4(),
           userId: user.id,
@@ -127,6 +160,7 @@ export class SeedService {
           price: pData.price,
           timezone: pData.timezone,
           themes: themes,
+          availability: availability,
           createdAt: new Date(),
           updatedAt: new Date(),
         });

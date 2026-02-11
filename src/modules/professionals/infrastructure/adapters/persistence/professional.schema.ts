@@ -4,11 +4,13 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import { User } from '../../../../users/infrastructure/adapters/persistence/user.schema';
 import { Theme } from '../../../../themes/infrastructure/adapters/persistence/theme.schema';
+import { ProfessionalAvailability } from './professional-availability.schema';
 
 @Entity('professionals')
 export class Professional {
@@ -38,6 +40,11 @@ export class Professional {
     inverseJoinColumn: { name: 'theme_id', referencedColumnName: 'id' },
   })
   themes: Theme[];
+
+  @OneToMany(() => ProfessionalAvailability, (a) => a.professional, {
+    cascade: true,
+  })
+  availability: ProfessionalAvailability[];
 
   @Column({ type: 'timestamp' })
   createdAt: Date;
