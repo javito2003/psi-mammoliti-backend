@@ -8,16 +8,20 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { COOKIE_NAME } from '../auth.constants';
-import { LoginUserDto } from '../../application/dtos/login-user.dto';
-import { RegisterUserDto } from '../../application/dtos/register-user.dto';
-import { LoginUserUseCase } from '../../application/use-cases/login-user.use-case';
-import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
-import { RefreshAccessTokenUseCase } from '../../application/use-cases/refresh-access-token.use-case';
-import { LogoutUserUseCase } from '../../application/use-cases/logout-user.use-case';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { COOKIE_NAME } from '../../auth.constants';
+import { LoginUserDto } from '../../../application/dtos/login-user.dto';
+import { RegisterUserDto } from '../../../application/dtos/register-user.dto';
+import { LoginUserUseCase } from '../../../application/use-cases/login-user.use-case';
+import { RegisterUserUseCase } from '../../../application/use-cases/register-user.use-case';
+import { RefreshAccessTokenUseCase } from '../../../application/use-cases/refresh-access-token.use-case';
+import { LogoutUserUseCase } from '../../../application/use-cases/logout-user.use-case';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { UserId } from 'src/modules/shared/infrastructure/decorators/user-id.decorator';
-import { RefreshTokenNotFoundError } from '../../domain/exceptions/auth.error';
+import { RefreshTokenNotFoundError } from '../../../domain/exceptions/auth.error';
+import {
+  ACCESS_TOKEN_EXPIRATION_MINUTES,
+  REFRESH_TOKEN_EXPIRATION_DAYS,
+} from 'src/modules/auth/domain/constants/token.constant';
 
 @Controller('auth')
 export class AuthController {
@@ -37,14 +41,14 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: ACCESS_TOKEN_EXPIRATION_MINUTES * 60 * 1000, // 15 minutes
     });
 
     response.cookie(COOKIE_NAME.REFRESH, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: REFRESH_TOKEN_EXPIRATION_DAYS * 24 * 60 * 60 * 1000, // 7 days
       path: '/auth/refresh',
     });
   }
