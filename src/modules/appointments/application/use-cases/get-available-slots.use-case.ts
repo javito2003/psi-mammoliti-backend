@@ -11,11 +11,10 @@ import { AvailabilityBlock } from '../../../professionals/domain/entities/profes
 import {
   APPOINTMENT_DURATION_HOURS,
   AvailabilityBlockHours,
+  WEEK_DAYS,
 } from '../../domain/constants/availability-block.constants';
-import { setStartDay } from 'src/modules/shared/util/date.util';
+import { setHour } from 'src/modules/shared/util/date.util';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
-
-const TOTAL_DAYS = 7;
 
 @Injectable()
 export class GetAvailableSlotsUseCase {
@@ -28,9 +27,9 @@ export class GetAvailableSlotsUseCase {
 
   async execute(professionalId: string, weekStart?: string): Promise<string[]> {
     const startDate = weekStart ? new Date(weekStart) : new Date();
-    setStartDay(startDate);
+    setHour(startDate);
     const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + TOTAL_DAYS);
+    endDate.setDate(startDate.getDate() + WEEK_DAYS);
 
     // 1. Get Professional Availability Rules
     const professional = await this.professionalRepo.findById(professionalId);
@@ -50,8 +49,7 @@ export class GetAvailableSlotsUseCase {
     const slots: Date[] = [];
     const loopDate = new Date(startDate);
 
-    // Loop 7 days
-    for (let i = 0; i < TOTAL_DAYS; i++) {
+    for (let i = 0; i < WEEK_DAYS; i++) {
       const currentDayOfWeek = loopDate.getDay();
 
       // Find matching rules for this day
@@ -95,7 +93,7 @@ export class GetAvailableSlotsUseCase {
 
     for (let hour = startHour; hour < endHour; hour++) {
       const slot = new Date(baseDate);
-      setStartDay(slot, hour);
+      setHour(slot, hour);
       slots.push(slot);
     }
 

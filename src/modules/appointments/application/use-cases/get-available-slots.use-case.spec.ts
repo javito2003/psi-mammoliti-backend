@@ -6,6 +6,8 @@ import { ProfessionalEntity } from '../../../professionals/domain/entities/profe
 import { AvailabilityBlock } from '../../../professionals/domain/entities/professional-availability.entity';
 import { AppointmentStatus } from '../../domain/entities/appointment.entity';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
+import { setHour } from 'src/modules/shared/util/date.util';
+import { WEEK_DAYS } from '../../domain/constants/availability-block.constants';
 
 describe('GetAvailableSlotsUseCase', () => {
   let useCase: GetAvailableSlotsUseCase;
@@ -58,10 +60,10 @@ describe('GetAvailableSlotsUseCase', () => {
 
   it('should return generated slots excluding overlapping appointments and past times', async () => {
     const professional = buildProfessional();
-    const weekStart = new Date('2026-02-09T00:00:00.000Z');
+    const weekStart = new Date('2026-02-09T00:00:00.000');
     const professionalId = professional.id;
 
-    jest.setSystemTime(new Date('2026-02-08T00:00:00.000Z'));
+    jest.setSystemTime(new Date('2026-02-08T00:00:00.000'));
 
     professionalRepo.findById.mockResolvedValue(professional);
     appointmentRepo.findByProfessionalIdAndDateRange.mockResolvedValue([
@@ -83,9 +85,9 @@ describe('GetAvailableSlotsUseCase', () => {
     );
 
     const startDate = new Date(weekStart);
-    startDate.setHours(0, 0, 0, 0);
+    setHour(startDate);
     const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 7);
+    endDate.setDate(startDate.getDate() + WEEK_DAYS);
 
     expect(
       appointmentRepo.findByProfessionalIdAndDateRange,

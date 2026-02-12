@@ -1,4 +1,4 @@
-export const setStartDay = (
+export const setHour = (
   date: Date,
   hour: number = 0,
   minute: number = 0,
