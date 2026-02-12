@@ -100,11 +100,12 @@ export class SeedService {
 
     for (const themeData of THEMES) {
       if (!existingSlugs.has(themeData.slug)) {
-        const theme = new ThemeEntity({
+        const theme: ThemeEntity = {
           id: uuidv4(),
           name: themeData.name,
           slug: themeData.slug,
-        });
+        };
+
         const saved = await this.themeRepo.save(theme);
         savedThemes[saved.slug] = saved;
         this.logger.log(`Created Theme: ${saved.name}`);

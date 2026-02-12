@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ThemeEntity } from '../../../domain/entities/theme.entity';
 import { ThemeRepositoryPort } from '../../../domain/ports/theme.repository.port';
 import { Theme } from './theme.schema';
+import { ThemeMapper } from './theme.mapper';
 
 @Injectable()
 export class OrmThemeRepository implements ThemeRepositoryPort {
@@ -15,11 +16,11 @@ export class OrmThemeRepository implements ThemeRepositoryPort {
   async save(theme: ThemeEntity): Promise<ThemeEntity> {
     const entity = this.repository.create(theme);
     const saved = await this.repository.save(entity);
-    return new ThemeEntity(saved);
+    return ThemeMapper.toEntity(saved);
   }
 
   async findAll(): Promise<ThemeEntity[]> {
     const entities = await this.repository.find();
-    return entities.map((e) => new ThemeEntity(e));
+    return entities.map((e) => ThemeMapper.toEntity(e));
   }
 }

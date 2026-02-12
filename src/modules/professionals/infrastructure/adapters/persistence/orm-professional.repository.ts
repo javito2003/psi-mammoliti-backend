@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProfessionalEntity } from '../../../domain/entities/professional.entity';
-import { ThemeEntity } from '../../../../themes/domain/entities/theme.entity';
 import { ProfessionalRepositoryPort } from '../../../domain/ports/professional.repository.port';
 import { Professional } from './professional.schema';
 import { Theme } from '../../../../themes/infrastructure/adapters/persistence/theme.schema';
@@ -63,9 +62,11 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
       bio: schema.bio,
       price: Number(schema.price),
       timezone: schema.timezone,
-      themes: schema.themes?.map(
-        (t) => new ThemeEntity({ id: t.id, name: t.name, slug: t.slug }),
-      ),
+      themes: schema.themes?.map((t) => ({
+        id: t.id,
+        name: t.name,
+        slug: t.slug,
+      })),
       availability: schema.availability?.map(
         (a) =>
           new ProfessionalAvailabilityEntity({
