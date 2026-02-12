@@ -7,7 +7,7 @@ import { LoginUserUseCase } from '../application/use-cases/login-user.use-case';
 import { RegisterUserUseCase } from '../application/use-cases/register-user.use-case';
 import { RefreshAccessTokenUseCase } from '../application/use-cases/refresh-access-token.use-case';
 import { LogoutUserUseCase } from '../application/use-cases/logout-user.use-case';
-import { AuthController } from './http/auth.controller';
+import { AuthController } from './adapters/http/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { TOKEN_GENERATOR } from '../domain/ports/token-generator.port';
 import { JwtTokenGenerator } from './adapters/jwt-token-generator';

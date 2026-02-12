@@ -4,7 +4,7 @@ import {
   INVALID_CREDENTIALS_CODE,
   INVALID_REFRESH_TOKEN_CODE,
   REFRESH_TOKEN_NOT_FOUND_CODE,
-} from '../../domain/exceptions/auth.error';
+} from '../../../domain/exceptions/auth.error';
 import { UnauthorizedException } from '@nestjs/common';
 
 export const authHttpErrorMap: DomainErrorMap = {
