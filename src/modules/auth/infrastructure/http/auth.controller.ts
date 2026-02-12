@@ -4,7 +4,6 @@ import {
   Post,
   Req,
   Res,
-  UnauthorizedException,
   UseGuards,
   HttpCode,
 } from '@nestjs/common';
@@ -18,6 +17,7 @@ import { RefreshAccessTokenUseCase } from '../../application/use-cases/refresh-a
 import { LogoutUserUseCase } from '../../application/use-cases/logout-user.use-case';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { UserId } from 'src/modules/shared/infrastructure/decorators/user-id.decorator';
+import { RefreshTokenNotFoundError } from '../../domain/exceptions/auth.error';
 
 @Controller('auth')
 export class AuthController {
@@ -91,7 +91,7 @@ export class AuthController {
       | string
       | undefined;
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not found');
+      throw new RefreshTokenNotFoundError();
     }
 
     const { accessToken, newRefreshToken } =
