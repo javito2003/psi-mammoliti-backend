@@ -1,5 +1,6 @@
 import { IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
+import { SortOrder } from 'src/modules/shared/domain/interfaces/query-options.interface';
 
 export class PaginationQueryDto {
   @IsOptional()
@@ -16,6 +17,6 @@ export class PaginationQueryDto {
   limit: number = 10;
 
   @IsOptional()
-  @IsIn(['ASC', 'DESC'])
-  sortOrder: 'ASC' | 'DESC' = 'DESC';
+  @IsIn(Object.values(SortOrder))
+  sortOrder: SortOrder = SortOrder.DESC;
 }

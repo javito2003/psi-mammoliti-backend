@@ -1,8 +1,10 @@
+import { SortOrder } from './query-options.interface';
+
 export interface RepositoryFindOptions {
   offset: number;
   limit: number;
   sortBy?: string;
-  sortOrder?: 'ASC' | 'DESC';
+  sortOrder?: SortOrder;
 }
 
 export interface RepositoryFindResult<T> {

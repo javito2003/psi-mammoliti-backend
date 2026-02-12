@@ -8,6 +8,7 @@ import {
   type RepositoryFindOptions,
   type RepositoryFindResult,
 } from 'src/modules/shared/domain/interfaces/repository-options.interface';
+import { SortOrder } from 'src/modules/shared/domain/interfaces/query-options.interface';
 import { Professional } from './professional.schema';
 import { ProfessionalMapper } from './professional.mapper';
 
@@ -28,7 +29,12 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
     filter: ProfessionalFilter,
     query: RepositoryFindOptions,
   ): Promise<RepositoryFindResult<ProfessionalEntity>> {
-    const { offset, limit, sortBy = 'createdAt', sortOrder = 'DESC' } = query;
+    const {
+      offset,
+      limit,
+      sortBy = 'createdAt',
+      sortOrder = SortOrder.DESC,
+    } = query;
 
     const qb = this.repository
       .createQueryBuilder('professional')

@@ -1,4 +1,7 @@
-import { PaginatedResult, QueryOptions } from '../domain/interfaces/query-options.interface';
+import {
+  PaginatedResult,
+  QueryOptions,
+} from '../domain/interfaces/query-options.interface';
 
 export class PaginationUtil {
   static getPaginationParams(query?: QueryOptions): {

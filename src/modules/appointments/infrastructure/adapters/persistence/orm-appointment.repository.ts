@@ -7,6 +7,7 @@ import {
   type RepositoryFindOptions,
   type RepositoryFindResult,
 } from 'src/modules/shared/domain/interfaces/repository-options.interface';
+import { SortOrder } from 'src/modules/shared/domain/interfaces/query-options.interface';
 import { Appointment } from './appointment.schema';
 import { AppointmentMapper } from './appointment.mapper';
 
@@ -41,7 +42,12 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
     userId: string,
     query: RepositoryFindOptions,
   ): Promise<RepositoryFindResult<AppointmentEntity>> {
-    const { offset, limit, sortBy = 'startAt', sortOrder = 'DESC' } = query;
+    const {
+      offset,
+      limit,
+      sortBy = 'startAt',
+      sortOrder = SortOrder.DESC,
+    } = query;
 
     const [entities, total] = await this.repository.findAndCount({
       where: { userId },

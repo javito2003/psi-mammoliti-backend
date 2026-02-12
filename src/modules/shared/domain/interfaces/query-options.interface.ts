@@ -1,8 +1,13 @@
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
 export interface QueryOptions {
   page: number;
   limit: number;
   sortBy: string;
-  sortOrder: 'ASC' | 'DESC';
+  sortOrder: SortOrder;
 }
 
 export interface PaginatedResult<T> {
