@@ -4,6 +4,10 @@ import {
   type AppointmentRepositoryPort,
 } from '../../domain/ports/appointment.repository.port';
 import { AppointmentEntity } from '../../domain/entities/appointment.entity';
+import {
+  type PaginatedResult,
+  type QueryOptions,
+} from 'src/modules/shared/domain/interfaces/query-options.interface';
 
 @Injectable()
 export class GetUserAppointmentsUseCase {
@@ -12,7 +16,10 @@ export class GetUserAppointmentsUseCase {
     private readonly appointmentRepo: AppointmentRepositoryPort,
   ) {}
 
-  execute(userId: string): Promise<AppointmentEntity[]> {
-    return this.appointmentRepo.findByUserId(userId);
+  execute(
+    userId: string,
+    query?: QueryOptions,
+  ): Promise<PaginatedResult<AppointmentEntity>> {
+    return this.appointmentRepo.findByUserId(userId, query);
   }
 }

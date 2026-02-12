@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { AppointmentEntity } from '../../../domain/entities/appointment.entity';
 import { AppointmentRepositoryPort } from '../../../domain/ports/appointment.repository.port';
+import {
+  type PaginatedResult,
+  type QueryOptions,
+} from 'src/modules/shared/domain/interfaces/query-options.interface';
 import { Appointment } from './appointment.schema';
 import { AppointmentMapper } from './appointment.mapper';
 
@@ -33,12 +37,29 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
     return entities.map((e) => AppointmentMapper.toDomain(e));
   }
 
-  async findByUserId(userId: string): Promise<AppointmentEntity[]> {
-    const entities = await this.repository.find({
+  async findByUserId(
+    userId: string,
+    query?: QueryOptions,
+  ): Promise<PaginatedResult<AppointmentEntity>> {
+    const page = query?.page ?? 1;
+    const limit = query?.limit ?? 10;
+    const sortBy = query?.sortBy ?? 'startAt';
+    const sortOrder = query?.sortOrder ?? 'DESC';
+
+    const [entities, total] = await this.repository.findAndCount({
       where: { userId },
       relations: ['professional', 'professional.user'],
-      order: { startAt: 'DESC' },
+      order: { [sortBy]: sortOrder },
+      skip: (page - 1) * limit,
+      take: limit,
     });
-    return entities.map((e) => AppointmentMapper.toDomain(e));
+
+    return {
+      data: entities.map((e) => AppointmentMapper.toDomain(e)),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }

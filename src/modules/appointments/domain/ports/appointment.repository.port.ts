@@ -1,4 +1,8 @@
 import { AppointmentEntity } from '../entities/appointment.entity';
+import {
+  type PaginatedResult,
+  type QueryOptions,
+} from 'src/modules/shared/domain/interfaces/query-options.interface';
 
 export const APPOINTMENT_REPOSITORY = 'APPOINTMENT_REPOSITORY';
 
@@ -9,5 +13,8 @@ export interface AppointmentRepositoryPort {
     start: Date,
     end: Date,
   ): Promise<AppointmentEntity[]>;
-  findByUserId(userId: string): Promise<AppointmentEntity[]>;
+  findByUserId(
+    userId: string,
+    query?: QueryOptions,
+  ): Promise<PaginatedResult<AppointmentEntity>>;
 }
