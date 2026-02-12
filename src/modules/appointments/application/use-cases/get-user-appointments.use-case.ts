@@ -8,6 +8,7 @@ import {
   type PaginatedResult,
   type QueryOptions,
 } from 'src/modules/shared/domain/interfaces/query-options.interface';
+import { PaginationUtil } from 'src/modules/shared/util/pagination.util';
 
 @Injectable()
 export class GetUserAppointmentsUseCase {
@@ -16,10 +17,18 @@ export class GetUserAppointmentsUseCase {
     private readonly appointmentRepo: AppointmentRepositoryPort,
   ) {}
 
-  execute(
+  async execute(
     userId: string,
     query?: QueryOptions,
   ): Promise<PaginatedResult<AppointmentEntity>> {
-    return this.appointmentRepo.findByUserId(userId, query);
+    const { page, limit, offset } = PaginationUtil.getPaginationParams(query);
+
+    const { data, total } = await this.appointmentRepo.findByUserId(userId, {
+      ...query,
+      offset,
+      limit,
+    });
+
+    return PaginationUtil.createResult(data, total, page, limit);
   }
 }

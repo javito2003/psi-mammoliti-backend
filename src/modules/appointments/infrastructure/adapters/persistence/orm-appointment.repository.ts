@@ -4,9 +4,9 @@ import { Between, Repository } from 'typeorm';
 import { AppointmentEntity } from '../../../domain/entities/appointment.entity';
 import { AppointmentRepositoryPort } from '../../../domain/ports/appointment.repository.port';
 import {
-  type PaginatedResult,
-  type QueryOptions,
-} from 'src/modules/shared/domain/interfaces/query-options.interface';
+  type RepositoryFindOptions,
+  type RepositoryFindResult,
+} from 'src/modules/shared/domain/interfaces/repository-options.interface';
 import { Appointment } from './appointment.schema';
 import { AppointmentMapper } from './appointment.mapper';
 
@@ -39,27 +39,21 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
 
   async findByUserId(
     userId: string,
-    query?: QueryOptions,
-  ): Promise<PaginatedResult<AppointmentEntity>> {
-    const page = query?.page ?? 1;
-    const limit = query?.limit ?? 10;
-    const sortBy = query?.sortBy ?? 'startAt';
-    const sortOrder = query?.sortOrder ?? 'DESC';
+    query: RepositoryFindOptions,
+  ): Promise<RepositoryFindResult<AppointmentEntity>> {
+    const { offset, limit, sortBy = 'startAt', sortOrder = 'DESC' } = query;
 
     const [entities, total] = await this.repository.findAndCount({
       where: { userId },
       relations: ['professional', 'professional.user'],
       order: { [sortBy]: sortOrder },
-      skip: (page - 1) * limit,
+      skip: offset,
       take: limit,
     });
 
     return {
       data: entities.map((e) => AppointmentMapper.toDomain(e)),
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
     };
   }
 }

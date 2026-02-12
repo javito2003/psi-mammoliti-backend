@@ -9,6 +9,7 @@ import {
   type PaginatedResult,
   type QueryOptions,
 } from 'src/modules/shared/domain/interfaces/query-options.interface';
+import { PaginationUtil } from 'src/modules/shared/util/pagination.util';
 
 @Injectable()
 export class GetProfessionalsUseCase {
@@ -21,6 +22,14 @@ export class GetProfessionalsUseCase {
     filter?: ProfessionalFilter,
     query?: QueryOptions,
   ): Promise<PaginatedResult<ProfessionalEntity>> {
-    return this.repository.findAll(filter, query);
+    const { page, limit, offset } = PaginationUtil.getPaginationParams(query);
+
+    const { data, total } = await this.repository.findAll(filter ?? {}, {
+      ...query,
+      offset,
+      limit,
+    });
+
+    return PaginationUtil.createResult(data, total, page, limit);
   }
 }

@@ -5,9 +5,9 @@ import { ProfessionalEntity } from '../../../domain/entities/professional.entity
 import { ProfessionalRepositoryPort } from '../../../domain/ports/professional.repository.port';
 import { ProfessionalFilter } from '../../../domain/interfaces/professional-filter.interface';
 import {
-  type PaginatedResult,
-  type QueryOptions,
-} from 'src/modules/shared/domain/interfaces/query-options.interface';
+  type RepositoryFindOptions,
+  type RepositoryFindResult,
+} from 'src/modules/shared/domain/interfaces/repository-options.interface';
 import { Professional } from './professional.schema';
 import { ProfessionalMapper } from './professional.mapper';
 
@@ -25,13 +25,10 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
   }
 
   async findAll(
-    filter?: ProfessionalFilter,
-    query?: QueryOptions,
-  ): Promise<PaginatedResult<ProfessionalEntity>> {
-    const page = query?.page ?? 1;
-    const limit = query?.limit ?? 10;
-    const sortBy = query?.sortBy ?? 'createdAt';
-    const sortOrder = query?.sortOrder ?? 'DESC';
+    filter: ProfessionalFilter,
+    query: RepositoryFindOptions,
+  ): Promise<RepositoryFindResult<ProfessionalEntity>> {
+    const { offset, limit, sortBy = 'createdAt', sortOrder = 'DESC' } = query;
 
     const qb = this.repository
       .createQueryBuilder('professional')
@@ -39,7 +36,7 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
       .leftJoinAndSelect('professional.themes', 'themes')
       .leftJoinAndSelect('professional.availability', 'availability');
 
-    if (filter?.themeSlug) {
+    if (filter.themeSlug) {
       qb.innerJoin(
         'professional.themes',
         'filterTheme',
@@ -48,18 +45,13 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
       );
     }
 
-    qb.orderBy(`professional.${sortBy}`, sortOrder)
-      .skip((page - 1) * limit)
-      .take(limit);
+    qb.orderBy(`professional.${sortBy}`, sortOrder).skip(offset).take(limit);
 
     const [entities, total] = await qb.getManyAndCount();
 
     return {
       data: entities.map((e) => ProfessionalMapper.toDomain(e)),
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
     };
   }
 
