@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from '../../modules/users/domain/entities/user.entity';
 import { UserCreator } from '../../modules/users/domain/services/user-creator.service';
+import { UserAlreadyExistsError } from '../../modules/users/domain/exceptions/user-already-exists.error';
 import { ProfessionalEntity } from '../../modules/professionals/domain/entities/professional.entity';
 import {
   AvailabilityBlock,
@@ -128,10 +129,9 @@ export class SeedService {
             pData.password,
           );
           this.logger.log(`Created User: ${user.email}`);
-        } catch (e: any) {
-          if (e.message === 'User already exists') {
+        } catch (e) {
+          if (e instanceof UserAlreadyExistsError) {
             this.logger.log(`User already exists: ${pData.email}, skipping.`);
-            // In a real seeder, find user by email. Here we just skip to avoid complexity.
             continue;
           }
           throw e;

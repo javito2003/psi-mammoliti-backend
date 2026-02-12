@@ -6,14 +6,15 @@ import { OrmUserRepository } from './adapters/persistence/orm-user.repository';
 import { User } from './adapters/persistence/user.schema';
 import { PASSWORD_HASHER } from '../domain/ports/password-hasher.port';
 import { BcryptPasswordHasher } from './adapters/bcrypt-password-hasher';
-import { UsersController } from './http/users.controller';
+import { UsersController } from './adapters/http/users.controller';
 import { GetUserProfileUseCase } from '../application/use-cases/get-user-profile.use-case';
+import { UserRepositoryPort } from '../domain/ports/user.repository.port';
+import { PasswordHasherPort } from '../domain/ports/password-hasher.port';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UsersController],
   providers: [
-    UserCreator,
     GetUserProfileUseCase,
     {
       provide: USER_REPOSITORY,
@@ -22,6 +23,14 @@ import { GetUserProfileUseCase } from '../application/use-cases/get-user-profile
     {
       provide: PASSWORD_HASHER,
       useClass: BcryptPasswordHasher,
+    },
+    {
+      provide: UserCreator,
+      useFactory: (
+        userRepository: UserRepositoryPort,
+        passwordHasher: PasswordHasherPort,
+      ) => new UserCreator(userRepository, passwordHasher),
+      inject: [USER_REPOSITORY, PASSWORD_HASHER],
     },
   ],
   exports: [USER_REPOSITORY, UserCreator, PASSWORD_HASHER],
