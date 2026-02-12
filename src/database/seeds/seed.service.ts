@@ -35,7 +35,7 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Specialist in Anxiety and Depression with 10 years experience.',
     price: 80.0,
-    timezone: 'UTC-5',
+    timezone: 'America/Argentina/Buenos_Aires',
     themes: ['anxiety', 'depression'],
     availability: [
       { dayOfWeek: 1, block: AvailabilityBlock.MORNING }, // Mon Morning
@@ -51,7 +51,7 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Relationship counselor focusing on communication.',
     price: 100.0,
-    timezone: 'UTC+1',
+    timezone: 'America/Argentina/Buenos_Aires',
     themes: ['relationships', 'grief'],
     availability: [
       { dayOfWeek: 2, block: AvailabilityBlock.EVENING }, // Tue Evening
@@ -66,7 +66,7 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Trauma specialist. Helping you find your strength.',
     price: 120.0,
-    timezone: 'UTC-8',
+    timezone: 'America/United_States/New_York',
     themes: ['trauma', 'anxiety', 'personal-growth'],
     availability: [
       { dayOfWeek: 1, block: AvailabilityBlock.AFTERNOON }, // Mon Afternoon
