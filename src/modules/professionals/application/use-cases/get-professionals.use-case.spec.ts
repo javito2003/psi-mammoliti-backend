@@ -68,10 +68,13 @@ describe('GetProfessionalsUseCase', () => {
 
     const result = await useCase.execute();
 
-    expect(repository.findAll).toHaveBeenCalledWith({}, {
-      offset: 0,
-      limit: 50,
-    });
+    expect(repository.findAll).toHaveBeenCalledWith(
+      {},
+      {
+        offset: 0,
+        limit: 50,
+      },
+    );
     expect(result).toEqual({
       data: [],
       total: 0,

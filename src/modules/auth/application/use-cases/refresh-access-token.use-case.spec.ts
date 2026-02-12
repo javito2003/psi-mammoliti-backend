@@ -85,9 +85,9 @@ describe('RefreshAccessTokenUseCase', () => {
   it('should throw InvalidRefreshTokenError when token verification fails', async () => {
     tokenGeneratorPort.verify.mockRejectedValue(new Error('invalid token'));
 
-    await expect(useCase.execute(faker.string.alphanumeric(50))).rejects.toThrow(
-      InvalidRefreshTokenError,
-    );
+    await expect(
+      useCase.execute(faker.string.alphanumeric(50)),
+    ).rejects.toThrow(InvalidRefreshTokenError);
 
     expect(userRepository.findById).not.toHaveBeenCalled();
   });
@@ -107,9 +107,9 @@ describe('RefreshAccessTokenUseCase', () => {
       updatedAt: new Date(),
     });
 
-    await expect(useCase.execute(faker.string.alphanumeric(50))).rejects.toThrow(
-      AccessDeniedError,
-    );
+    await expect(
+      useCase.execute(faker.string.alphanumeric(50)),
+    ).rejects.toThrow(AccessDeniedError);
 
     expect(passwordHasher.compare).not.toHaveBeenCalled();
   });
@@ -131,9 +131,9 @@ describe('RefreshAccessTokenUseCase', () => {
     });
     passwordHasher.compare.mockResolvedValue(false);
 
-    await expect(useCase.execute(faker.string.alphanumeric(50))).rejects.toThrow(
-      AccessDeniedError,
-    );
+    await expect(
+      useCase.execute(faker.string.alphanumeric(50)),
+    ).rejects.toThrow(AccessDeniedError);
 
     expect(tokenGenerator.generate).not.toHaveBeenCalled();
   });

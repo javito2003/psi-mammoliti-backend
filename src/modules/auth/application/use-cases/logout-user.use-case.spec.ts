@@ -22,6 +22,9 @@ describe('LogoutUserUseCase', () => {
 
     await useCase.execute(userId);
 
-    expect(userRepository.updateRefreshToken).toHaveBeenCalledWith(userId, null);
+    expect(userRepository.updateRefreshToken).toHaveBeenCalledWith(
+      userId,
+      null,
+    );
   });
 });
