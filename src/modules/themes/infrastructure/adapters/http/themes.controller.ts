@@ -1,6 +1,11 @@
-import { ClassSerializerInterceptor, Controller, Get, UseInterceptors } from '@nestjs/common';
-import { ThemeResponseDto } from '../application/dtos/theme-response.dto';
-import { GetThemesUseCase } from '../application/use-cases/get-themes.use-case';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  UseInterceptors,
+} from '@nestjs/common';
+import { GetThemesUseCase } from 'src/modules/themes/application/use-cases/get-themes.use-case';
+import { ThemeResponseDto } from './dtos/theme-response.dto';
 
 @Controller('themes')
 export class ThemesController {
