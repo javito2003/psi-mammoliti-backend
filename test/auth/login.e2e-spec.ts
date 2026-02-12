@@ -1,13 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../../src/app.module';
 import { RegisterUserDto } from '../../src/modules/auth/application/dtos/register-user.dto';
 import { LoginUserDto } from '../../src/modules/auth/application/dtos/login-user.dto';
 import { faker } from '@faker-js/faker';
 import { COOKIE_NAME } from '../../src/modules/auth/infrastructure/auth.constants';
-import cookieParser from 'cookie-parser';
-import { DomainExceptionFilter } from '../../src/modules/shared/infrastructure/adapter/http/filters/domain-exception.filter';
+import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import { USER_PASSWORD_MIN_LENGTH } from '../../src/modules/users/domain/entities/user.entity';
 
 describe('Auth - Login (e2e)', () => {
   let app: INestApplication;
@@ -15,28 +13,25 @@ describe('Auth - Login (e2e)', () => {
   const userData: RegisterUserDto = {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
-    email: faker.internet.email(),
-    password: faker.internet.password({ length: 10 }),
+    email: faker.internet.email().toLowerCase(),
+    password: faker.string.alpha(USER_PASSWORD_MIN_LENGTH),
   };
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const context = await createTestApp();
+    app = context.app;
+  });
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, transform: true }),
-    );
-    app.useGlobalFilters(new DomainExceptionFilter());
-    app.use(cookieParser());
-    await app.init();
-
-    // Pre-register user
+  beforeEach(async () => {
+    // Pre-register user before each test to ensure clean state
     await request(app.getHttpServer())
       .post('/auth/register')
       .send(userData)
       .expect(201);
+  });
+
+  afterEach(async () => {
+    await cleanupDatabase(app);
   });
 
   afterAll(async () => {
@@ -71,14 +66,20 @@ describe('Auth - Login (e2e)', () => {
   it('should return 401 when logging in with wrong password', async () => {
     return request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: userData.email, password: 'wrongpassword' })
+      .send({
+        email: userData.email,
+        password: faker.string.alpha(USER_PASSWORD_MIN_LENGTH),
+      })
       .expect(401);
   });
 
   it('should return 401 when logging in with non-existent email', async () => {
     return request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: faker.internet.email(), password: 'anypassword' })
+      .send({
+        email: faker.internet.email(),
+        password: faker.string.alpha(USER_PASSWORD_MIN_LENGTH),
+      })
       .expect(401);
   });
 });

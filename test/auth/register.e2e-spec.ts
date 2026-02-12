@@ -1,27 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../../src/app.module';
 import { RegisterUserDto } from '../../src/modules/auth/application/dtos/register-user.dto';
 import { faker } from '@faker-js/faker';
-import cookieParser from 'cookie-parser';
-import { DomainExceptionFilter } from '../../src/modules/shared/infrastructure/adapter/http/filters/domain-exception.filter';
+import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import {
+  USER_PASSWORD_MAX_LENGTH,
+  USER_PASSWORD_MIN_LENGTH,
+} from '../../src/modules/users/domain/entities/user.entity';
 
 describe('Auth - Register (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const context = await createTestApp();
+    app = context.app;
+  });
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, transform: true }),
-    );
-    app.useGlobalFilters(new DomainExceptionFilter());
-    app.use(cookieParser());
-    await app.init();
+  afterEach(async () => {
+    await cleanupDatabase(app);
   });
 
   afterAll(async () => {
@@ -31,8 +27,8 @@ describe('Auth - Register (e2e)', () => {
   const userData: RegisterUserDto = {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
-    email: faker.internet.email(),
-    password: faker.internet.password({ length: 10 }),
+    email: faker.internet.email().toLowerCase(),
+    password: faker.string.alphanumeric(USER_PASSWORD_MIN_LENGTH),
   };
 
   it('should register a new user (201)', async () => {
@@ -43,7 +39,7 @@ describe('Auth - Register (e2e)', () => {
   });
 
   it('should return 400 when registering with invalid email', async () => {
-    const invalidData = { ...userData, email: 'invalid-email' };
+    const invalidData = { ...userData, email: faker.string.alphanumeric() };
     return request(app.getHttpServer())
       .post('/auth/register')
       .send(invalidData)
@@ -51,7 +47,27 @@ describe('Auth - Register (e2e)', () => {
   });
 
   it('should return 400 when registering with short password', async () => {
-    const invalidData = { ...userData, password: '123' };
+    const invalidData = {
+      ...userData,
+      password: faker.internet.password({
+        length: USER_PASSWORD_MIN_LENGTH - 1,
+      }),
+    };
+
+    return request(app.getHttpServer())
+      .post('/auth/register')
+      .send(invalidData)
+      .expect(400);
+  });
+
+  it('should return 400 when registering with too long password', async () => {
+    const invalidData = {
+      ...userData,
+      password: faker.internet.password({
+        length: USER_PASSWORD_MAX_LENGTH + 1,
+      }),
+    };
+
     return request(app.getHttpServer())
       .post('/auth/register')
       .send(invalidData)
@@ -59,7 +75,13 @@ describe('Auth - Register (e2e)', () => {
   });
 
   it('should return 409 when registering with existing email', async () => {
-    // Attempt to register with the same userData used in the first test
+    // Register first to ensure user exists
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(userData)
+      .expect(201);
+
+    // Attempt to register with the same userData
     return request(app.getHttpServer())
       .post('/auth/register')
       .send(userData)
