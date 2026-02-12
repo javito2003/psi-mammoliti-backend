@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { ProfessionalEntity } from '../../../domain/entities/professional.entity';
 import { ThemeEntity } from '../../../../themes/domain/entities/theme.entity';
 import { ProfessionalRepositoryPort } from '../../../domain/ports/professional.repository.port';
-import { UserEntity } from '../../../../users/domain/entities/user.entity';
 import { Professional } from './professional.schema';
 import { Theme } from '../../../../themes/infrastructure/adapters/persistence/theme.schema';
 
@@ -52,12 +51,14 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
       id: schema.id,
       userId: schema.userId,
       user: schema.user
-        ? new UserEntity({
+        ? {
             id: schema.user.id,
             firstName: schema.user.firstName,
             lastName: schema.user.lastName,
             email: schema.user.email,
-          })
+            createdAt: schema.user.createdAt,
+            updatedAt: schema.user.updatedAt,
+          }
         : undefined,
       bio: schema.bio,
       price: Number(schema.price),

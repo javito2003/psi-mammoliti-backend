@@ -8,3 +8,8 @@ export interface UserEntity {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type UserPublicEntity = Omit<
+  UserEntity,
+  'password' | 'hashedRefreshToken'
+>;
