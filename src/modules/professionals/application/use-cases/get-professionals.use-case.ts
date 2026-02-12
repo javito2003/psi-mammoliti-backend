@@ -12,7 +12,7 @@ export class GetProfessionalsUseCase {
     private readonly repository: ProfessionalRepositoryPort,
   ) {}
 
-  async execute(): Promise<ProfessionalEntity[]> {
-    return this.repository.findAll();
+  async execute(themeSlug?: string): Promise<ProfessionalEntity[]> {
+    return this.repository.findAll(themeSlug);
   }
 }

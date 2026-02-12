@@ -19,10 +19,23 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
     return ProfessionalMapper.toDomain(saved);
   }
 
-  async findAll(): Promise<ProfessionalEntity[]> {
-    const entities = await this.repository.find({
-      relations: ['user', 'themes', 'availability'],
-    });
+  async findAll(themeSlug?: string): Promise<ProfessionalEntity[]> {
+    const query = this.repository
+      .createQueryBuilder('professional')
+      .leftJoinAndSelect('professional.user', 'user')
+      .leftJoinAndSelect('professional.themes', 'themes')
+      .leftJoinAndSelect('professional.availability', 'availability');
+
+    if (themeSlug) {
+      query.innerJoin(
+        'professional.themes',
+        'filterTheme',
+        'filterTheme.slug = :slug',
+        { slug: themeSlug },
+      );
+    }
+
+    const entities = await query.getMany();
     return entities.map((e) => ProfessionalMapper.toDomain(e));
   }
 

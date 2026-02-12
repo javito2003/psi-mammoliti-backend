@@ -2,6 +2,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { GetProfessionalsUseCase } from 'src/modules/professionals/application/use-cases/get-professionals.use-case';
@@ -15,8 +16,8 @@ export class ProfessionalsController {
 
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
-  async getAll() {
-    const professionals = await this.getProfessionalsUseCase.execute();
+  async getAll(@Query('theme') theme?: string) {
+    const professionals = await this.getProfessionalsUseCase.execute(theme);
     return professionals.map((p) => new ProfessionalResponseDto(p));
   }
 }

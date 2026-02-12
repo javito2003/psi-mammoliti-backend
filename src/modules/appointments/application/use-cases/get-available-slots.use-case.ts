@@ -11,7 +11,7 @@ import { AvailabilityBlock } from '../../../professionals/domain/entities/profes
 import {
   APPOINTMENT_DURATION_HOURS,
   AvailabilityBlockHours,
-} from '../../infrastructure/constants/availability-block.constants';
+} from '../../domain/constants/availability-block.constants';
 import { setStartDay } from 'src/modules/shared/util/date.util';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
 

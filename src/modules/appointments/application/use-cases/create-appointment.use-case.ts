@@ -12,7 +12,7 @@ import {
   AppointmentEntity,
   AppointmentStatus,
 } from '../../domain/entities/appointment.entity';
-import { APPOINTMENT_DURATION_HOURS } from '../../infrastructure/constants/availability-block.constants';
+import { APPOINTMENT_DURATION_HOURS } from '../../domain/constants/availability-block.constants';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
 import { AppointmentAlreadyBookedError } from '../../domain/exceptions/appointments.error';
 
