@@ -50,20 +50,15 @@ describe('GetUserAppointmentsUseCase', () => {
       offset: 10,
       limit: 10,
     });
-    expect(result).toEqual({
-      data: expect.arrayContaining([
-        expect.objectContaining({
-          id: expect.any(String),
-          professionalId: expect.any(String),
-          userId,
-          status: AppointmentStatus.CONFIRMED,
-        }),
-      ]),
-      total: 21,
-      page: 2,
-      limit: 10,
-      totalPages: 3,
-    });
+    expect(result.total).toBe(21);
+    expect(result.page).toBe(2);
+    expect(result.limit).toBe(10);
+    expect(result.totalPages).toBe(3);
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0]?.id).toBeDefined();
+    expect(result.data[0]?.professionalId).toBeDefined();
+    expect(result.data[0]?.userId).toBe(userId);
+    expect(result.data[0]?.status).toBe(AppointmentStatus.CONFIRMED);
   });
 
   it('should apply default pagination when query is not provided', async () => {

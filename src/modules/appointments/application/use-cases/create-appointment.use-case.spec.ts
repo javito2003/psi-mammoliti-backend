@@ -48,7 +48,9 @@ describe('CreateAppointmentUseCase', () => {
 
     professionalRepo.findById.mockResolvedValue(professional);
     appointmentRepo.findByProfessionalIdAndDateRange.mockResolvedValue([]);
-    appointmentRepo.save.mockImplementation(async (appointment) => appointment);
+    appointmentRepo.save.mockImplementation((appointment) =>
+      Promise.resolve(appointment),
+    );
 
     const result = await useCase.execute(professional.id, userId, startAt);
 
@@ -60,16 +62,16 @@ describe('CreateAppointmentUseCase', () => {
       new Date(startAt),
       new Date('2026-02-16T10:00:00.000Z'),
     );
-    expect(appointmentRepo.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: expect.any(String),
-        professionalId: professional.id,
-        userId,
-        startAt: new Date(startAt),
-        endAt: new Date('2026-02-16T10:00:00.000Z'),
-        status: AppointmentStatus.CONFIRMED,
-      }),
+    const savedAppointment = appointmentRepo.save.mock.calls[0]?.[0];
+    expect(savedAppointment).toBeDefined();
+    expect(savedAppointment?.id).toBeDefined();
+    expect(savedAppointment?.professionalId).toBe(professional.id);
+    expect(savedAppointment?.userId).toBe(userId);
+    expect(savedAppointment?.startAt).toEqual(new Date(startAt));
+    expect(savedAppointment?.endAt).toEqual(
+      new Date('2026-02-16T10:00:00.000Z'),
     );
+    expect(savedAppointment?.status).toBe(AppointmentStatus.CONFIRMED);
     expect(result.status).toBe(AppointmentStatus.CONFIRMED);
   });
 
