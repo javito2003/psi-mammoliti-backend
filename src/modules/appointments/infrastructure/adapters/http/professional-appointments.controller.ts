@@ -5,13 +5,11 @@ import {
   Param,
   Post,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
-import { GetAvailableSlotsUseCase } from '../../application/use-cases/get-available-slots.use-case';
-import { CreateAppointmentUseCase } from '../../application/use-cases/create-appointment.use-case';
-import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
-import type { Request } from 'express';
+import { GetAvailableSlotsUseCase } from '../../../application/use-cases/get-available-slots.use-case';
+import { CreateAppointmentUseCase } from '../../../application/use-cases/create-appointment.use-case';
+import { JwtAuthGuard } from '../../../../auth/infrastructure/guards/jwt-auth.guard';
 import { UserId } from 'src/modules/shared/infrastructure/decorators/user-id.decorator';
 
 @Controller('professionals')

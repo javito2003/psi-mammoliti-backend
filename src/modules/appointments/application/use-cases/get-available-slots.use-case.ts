@@ -12,6 +12,10 @@ import {
   APPOINTMENT_DURATION_HOURS,
   AvailabilityBlockHours,
 } from '../../infrastructure/constants/availability-block.constants';
+import { setStartDay } from 'src/modules/shared/util/date.util';
+import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professional-not-found.error';
+
+const TOTAL_DAYS = 7;
 
 @Injectable()
 export class GetAvailableSlotsUseCase {
@@ -24,15 +28,15 @@ export class GetAvailableSlotsUseCase {
 
   async execute(professionalId: string, weekStart?: string): Promise<string[]> {
     const startDate = weekStart ? new Date(weekStart) : new Date();
-    startDate.setHours(0, 0, 0, 0);
+    setStartDay(startDate);
     const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 7);
+    endDate.setDate(startDate.getDate() + TOTAL_DAYS);
 
     // 1. Get Professional Availability Rules
     const professional = await this.professionalRepo.findById(professionalId);
-    if (!professional) throw new Error('Professional not found');
+    if (!professional) throw new ProfessionalNotFoundError(professionalId);
 
-    const availabilityRules = professional.availability; // Array of { dayOfWeek, block }
+    const { availability: availabilityRules } = professional;
 
     // 2. Get Existing Appointments
     const appointments =
@@ -47,8 +51,8 @@ export class GetAvailableSlotsUseCase {
     const loopDate = new Date(startDate);
 
     // Loop 7 days
-    for (let i = 0; i < 7; i++) {
-      const currentDayOfWeek = loopDate.getDay(); // 0-6
+    for (let i = 0; i < TOTAL_DAYS; i++) {
+      const currentDayOfWeek = loopDate.getDay();
 
       // Find matching rules for this day
       const dayRules = availabilityRules.filter(
@@ -71,7 +75,6 @@ export class GetAvailableSlotsUseCase {
       slotEnd.setHours(slot.getHours() + APPOINTMENT_DURATION_HOURS);
 
       return !appointments.some((appt) => {
-        // Overlap logic: (StartA < EndB) and (EndA > StartB)
         return appt.startAt < slotEnd && appt.endAt > slot;
       });
     });
@@ -85,14 +88,14 @@ export class GetAvailableSlotsUseCase {
 
   private generateSlotsForBlock(date: Date, block: AvailabilityBlock): Date[] {
     const slots: Date[] = [];
-    const baseDate = new Date(date); // Clone to avoid mutating loopDate
+    const baseDate = new Date(date);
 
     const { start: startHour = 0, end: endHour = 0 } =
       AvailabilityBlockHours[block];
 
     for (let hour = startHour; hour < endHour; hour++) {
       const slot = new Date(baseDate);
-      slot.setHours(hour, 0, 0, 0);
+      setStartDay(slot, hour);
       slots.push(slot);
     }
 

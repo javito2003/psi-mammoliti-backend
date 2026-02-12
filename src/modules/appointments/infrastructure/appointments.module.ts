@@ -4,8 +4,8 @@ import { APPOINTMENT_REPOSITORY } from '../domain/ports/appointment.repository.p
 import { OrmAppointmentRepository } from './adapters/persistence/orm-appointment.repository';
 import { Appointment } from './adapters/persistence/appointment.schema';
 import { ProfessionalsModule } from '../../professionals/infrastructure/professionals.module';
-import { ProfessionalAppointmentsController } from './http/professional-appointments.controller';
-import { UserAppointmentsController } from './http/user-appointments.controller';
+import { ProfessionalAppointmentsController } from './adapters/http/professional-appointments.controller';
+import { UserAppointmentsController } from './adapters/http/user-appointments.controller';
 import { GetAvailableSlotsUseCase } from '../application/use-cases/get-available-slots.use-case';
 import { CreateAppointmentUseCase } from '../application/use-cases/create-appointment.use-case';
 import { GetUserAppointmentsUseCase } from '../application/use-cases/get-user-appointments.use-case';

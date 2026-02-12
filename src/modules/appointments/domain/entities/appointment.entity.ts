@@ -5,7 +5,7 @@ export enum AppointmentStatus {
   COMPLETED = 'COMPLETED',
 }
 
-export class AppointmentEntity {
+export interface AppointmentEntity {
   id: string;
   professionalId: string;
   userId: string;
@@ -16,8 +16,4 @@ export class AppointmentEntity {
   updatedAt: Date;
   professionalFirstName?: string;
   professionalLastName?: string;
-
-  constructor(partial: Partial<AppointmentEntity>) {
-    Object.assign(this, partial);
-  }
 }

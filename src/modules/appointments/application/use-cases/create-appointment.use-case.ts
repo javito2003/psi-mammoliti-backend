@@ -1,4 +1,9 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   APPOINTMENT_REPOSITORY,
@@ -49,7 +54,7 @@ export class CreateAppointmentUseCase {
     }
 
     const now = new Date();
-    const appointment = new AppointmentEntity({
+    const appointment: AppointmentEntity = {
       id: uuidv4(),
       professionalId,
       userId,
@@ -58,7 +63,7 @@ export class CreateAppointmentUseCase {
       status: AppointmentStatus.CONFIRMED,
       createdAt: now,
       updatedAt: now,
-    });
+    };
 
     return this.appointmentRepo.save(appointment);
   }

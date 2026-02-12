@@ -4,6 +4,7 @@ import { Between, Repository } from 'typeorm';
 import { AppointmentEntity } from '../../../domain/entities/appointment.entity';
 import { AppointmentRepositoryPort } from '../../../domain/ports/appointment.repository.port';
 import { Appointment } from './appointment.schema';
+import { AppointmentMapper } from './appointment.mapper';
 
 @Injectable()
 export class OrmAppointmentRepository implements AppointmentRepositoryPort {
@@ -13,9 +14,9 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
   ) {}
 
   async save(appointment: AppointmentEntity): Promise<AppointmentEntity> {
-    const persistence = this.toPersistence(appointment);
+    const persistence = AppointmentMapper.toPersistence(appointment);
     const saved = await this.repository.save(persistence);
-    return this.toDomain(saved);
+    return AppointmentMapper.toDomain(saved);
   }
 
   async findByProfessionalIdAndDateRange(
@@ -29,7 +30,7 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
         startAt: Between(start, end),
       },
     });
-    return entities.map((e) => this.toDomain(e));
+    return entities.map((e) => AppointmentMapper.toDomain(e));
   }
 
   async findByUserId(userId: string): Promise<AppointmentEntity[]> {
@@ -38,34 +39,6 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
       relations: ['professional', 'professional.user'],
       order: { startAt: 'DESC' },
     });
-    return entities.map((e) => this.toDomain(e));
-  }
-
-  private toDomain(schema: Appointment): AppointmentEntity {
-    return new AppointmentEntity({
-      id: schema.id,
-      professionalId: schema.professionalId,
-      userId: schema.userId,
-      startAt: schema.startAt,
-      endAt: schema.endAt,
-      status: schema.status,
-      createdAt: schema.createdAt,
-      updatedAt: schema.updatedAt,
-      professionalFirstName: schema.professional?.user?.firstName,
-      professionalLastName: schema.professional?.user?.lastName,
-    });
-  }
-
-  private toPersistence(domain: AppointmentEntity): Appointment {
-    const schema = new Appointment();
-    schema.id = domain.id;
-    schema.professionalId = domain.professionalId;
-    schema.userId = domain.userId;
-    schema.startAt = domain.startAt;
-    schema.endAt = domain.endAt;
-    schema.status = domain.status;
-    schema.createdAt = domain.createdAt;
-    schema.updatedAt = domain.updatedAt;
-    return schema;
+    return entities.map((e) => AppointmentMapper.toDomain(e));
   }
 }
