@@ -18,6 +18,9 @@ export class UserResponseDto {
   @Expose()
   createdAt: Date;
 
+  @Expose()
+  updatedAt: Date;
+
   constructor(user: UserEntity) {
     Object.assign(this, user);
   }
