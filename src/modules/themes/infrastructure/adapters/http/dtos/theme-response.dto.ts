@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { ThemeEntity } from '../../../../domain/entities/theme.entity';
+import type { ThemeEntity } from '../../../../domain/entities/theme.entity';
 
 @Exclude()
 export class ThemeResponseDto {

@@ -154,7 +154,7 @@ export class SeedService {
             }),
         );
 
-        const professional = new ProfessionalEntity({
+        const professional: ProfessionalEntity = {
           id: uuidv4(),
           userId: user.id,
           bio: pData.bio,
@@ -164,7 +164,7 @@ export class SeedService {
           availability: availability,
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        };
 
         await this.professionalRepo.save(professional);
         this.logger.log(`Created Professional Profile for: ${user.email}`);

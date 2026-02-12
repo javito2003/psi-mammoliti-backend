@@ -4,7 +4,7 @@ import { THEME_REPOSITORY } from '../domain/ports/theme.repository.port';
 import { GetThemesUseCase } from '../application/use-cases/get-themes.use-case';
 import { OrmThemeRepository } from './adapters/persistence/orm-theme.repository';
 import { Theme } from './adapters/persistence/theme.schema';
-import { ThemesController } from './themes.controller';
+import { ThemesController } from './adapters/http/themes.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Theme])],
