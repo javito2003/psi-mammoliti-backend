@@ -23,7 +23,7 @@ export class UserCreator {
 
     const hashedPassword = await this.passwordHasher.hash(plainPassword);
 
-    const newUser = new UserEntity({
+    const newUser: UserEntity = {
       id: uuidv4(),
       firstName,
       lastName,
@@ -31,7 +31,7 @@ export class UserCreator {
       password: hashedPassword,
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    };
 
     return this.userRepository.save(newUser);
   }

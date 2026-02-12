@@ -1,4 +1,4 @@
-export class UserEntity {
+export interface UserEntity {
   id: string;
   firstName: string;
   lastName: string;
@@ -7,8 +7,4 @@ export class UserEntity {
   hashedRefreshToken?: string;
   createdAt: Date;
   updatedAt: Date;
-
-  constructor(partial: Partial<UserEntity>) {
-    Object.assign(this, partial);
-  }
 }
