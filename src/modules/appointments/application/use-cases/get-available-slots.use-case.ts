@@ -13,7 +13,7 @@ import {
   AvailabilityBlockHours,
 } from '../../infrastructure/constants/availability-block.constants';
 import { setStartDay } from 'src/modules/shared/util/date.util';
-import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professional-not-found.error';
+import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
 
 const TOTAL_DAYS = 7;
 

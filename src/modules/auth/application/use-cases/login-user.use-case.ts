@@ -1,5 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   PASSWORD_HASHER,
   type PasswordHasherPort,
@@ -9,6 +8,8 @@ import {
   type UserRepositoryPort,
 } from '../../../users/domain/ports/user.repository.port';
 import { LoginUserDto } from '../dtos/login-user.dto';
+import { InvalidCredentialsError } from '../../domain/exceptions/auth.error';
+import { TokenGenerator } from '../../domain/services/token-generator.service';
 
 @Injectable()
 export class LoginUserUseCase {
@@ -17,7 +18,7 @@ export class LoginUserUseCase {
     private readonly userRepository: UserRepositoryPort,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasherPort,
-    private readonly jwtService: JwtService,
+    private readonly tokenGenerator: TokenGenerator,
   ) {}
 
   async execute(
@@ -25,7 +26,7 @@ export class LoginUserUseCase {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.userRepository.findByEmail(dto.email);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     const isPasswordValid = await this.passwordHasher.compare(
@@ -33,16 +34,9 @@ export class LoginUserUseCase {
       user.password,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
-    const payload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
-
-    const hashedRefreshToken = await this.passwordHasher.hash(refreshToken);
-    await this.userRepository.updateRefreshToken(user.id, hashedRefreshToken);
-
-    return { accessToken, refreshToken };
+    return this.tokenGenerator.generate(user.id, user.email);
   }
 }

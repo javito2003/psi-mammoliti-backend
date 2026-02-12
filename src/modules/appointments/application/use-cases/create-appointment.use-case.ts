@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   APPOINTMENT_REPOSITORY,
@@ -18,6 +13,8 @@ import {
   AppointmentStatus,
 } from '../../domain/entities/appointment.entity';
 import { APPOINTMENT_DURATION_HOURS } from '../../infrastructure/constants/availability-block.constants';
+import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
+import { AppointmentAlreadyBookedError } from '../../domain/exceptions/appointments.error';
 
 @Injectable()
 export class CreateAppointmentUseCase {
@@ -35,7 +32,7 @@ export class CreateAppointmentUseCase {
   ): Promise<AppointmentEntity> {
     const professional = await this.professionalRepo.findById(professionalId);
     if (!professional) {
-      throw new NotFoundException('Professional not found');
+      throw new ProfessionalNotFoundError(professionalId);
     }
 
     const startDate = new Date(startAt);
@@ -50,7 +47,7 @@ export class CreateAppointmentUseCase {
       );
 
     if (overlapping.length > 0) {
-      throw new ConflictException('This time slot is already booked');
+      throw new AppointmentAlreadyBookedError();
     }
 
     const now = new Date();

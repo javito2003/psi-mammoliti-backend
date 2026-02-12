@@ -1,12 +1,11 @@
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { DomainErrorMap } from 'src/modules/shared/infrastructure/adapter/http/types/domain-error-map.type';
 import {
-  ConflictException,
-  NotFoundException,
-  type HttpException,
-} from '@nestjs/common';
-import { USER_ALREADY_EXISTS_ERROR_CODE } from 'src/modules/users/domain/exceptions/user-already-exists.error';
-import { USER_NOT_FOUND_ERROR_CODE } from 'src/modules/users/domain/exceptions/user-not-found.error';
+  USER_ALREADY_EXISTS_ERROR_CODE,
+  USER_NOT_FOUND_ERROR_CODE,
+} from 'src/modules/users/domain/exceptions/users.error';
 
-export const usersHttpErrorMap: Record<string, (e: Error) => HttpException> = {
+export const usersHttpErrorMap: DomainErrorMap = {
   [USER_ALREADY_EXISTS_ERROR_CODE]: (e) => new ConflictException(e.message),
   [USER_NOT_FOUND_ERROR_CODE]: (e) => new NotFoundException(e.message),
 };

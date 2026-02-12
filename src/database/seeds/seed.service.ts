@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from '../../modules/users/domain/entities/user.entity';
 import { UserCreator } from '../../modules/users/domain/services/user-creator.service';
-import { UserAlreadyExistsError } from '../../modules/users/domain/exceptions/user-already-exists.error';
+import { UserAlreadyExistsError } from '../../modules/users/domain/exceptions/users.error';
 import { ProfessionalEntity } from '../../modules/professionals/domain/entities/professional.entity';
 import {
   AvailabilityBlock,

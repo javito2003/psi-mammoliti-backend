@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { UserCreator } from './user-creator.service';
 import { UserRepositoryPort } from '../ports/user.repository.port';
 import { PasswordHasherPort } from '../ports/password-hasher.port';
-import { UserAlreadyExistsError } from '../exceptions/user-already-exists.error';
+import { UserAlreadyExistsError } from '../exceptions/users.error';
 import { UserEntity } from '../entities/user.entity';
 
 describe('UserCreator', () => {

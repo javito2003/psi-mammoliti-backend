@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from '../entities/user.entity';
 import { type PasswordHasherPort } from '../ports/password-hasher.port';
 import { type UserRepositoryPort } from '../ports/user.repository.port';
-import { UserAlreadyExistsError } from '../exceptions/user-already-exists.error';
+import { UserAlreadyExistsError } from '../exceptions/users.error';
 
 export class UserCreator {
   constructor(

@@ -3,7 +3,7 @@ import {
   USER_REPOSITORY,
   type UserRepositoryPort,
 } from '../../domain/ports/user.repository.port';
-import { UserNotFoundError } from '../../domain/exceptions/user-not-found.error';
+import { UserNotFoundError } from '../../domain/exceptions/users.error';
 import { UserEntity } from '../../domain/entities/user.entity';
 
 @Injectable()
