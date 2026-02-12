@@ -33,7 +33,7 @@ export async function cleanupDatabase(app: INestApplication) {
     const entities = dataSource.entityMetadatas;
     for (const entity of entities) {
       const tableName = entity.tableName;
-      await queryRunner.query(`TRUNCATE TABLE \`${tableName}\`;`);
+      await queryRunner.query(`DELETE FROM \`${tableName}\`;`);
     }
 
     await queryRunner.query('SET FOREIGN_KEY_CHECKS = 1;');
