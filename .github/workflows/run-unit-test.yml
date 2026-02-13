@@ -1,4 +1,4 @@
-name: Deploy to Production and Development
+name: Run Unit Tests
 
 on: push
 

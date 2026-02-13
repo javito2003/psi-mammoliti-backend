@@ -1,4 +1,4 @@
-name: Deploy to Production and Development
+name: Run E2E Tests
 
 on: push
 
