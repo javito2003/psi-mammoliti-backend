@@ -37,11 +37,13 @@ describe('Auth - Logout (e2e)', () => {
       .send({ email: userData.email, password: userData.password })
       .expect(201);
 
-    const cookies = loginResponse.headers['set-cookie'];
+    const cookies = Array.isArray(loginResponse.headers['set-cookie'])
+      ? loginResponse.headers['set-cookie']
+      : [];
     const accessCookie = cookies.find((c: string) =>
       c.startsWith(COOKIE_NAME.ACCESS),
     );
-    accessTokenCookie = accessCookie.split(';')[0];
+    accessTokenCookie = accessCookie?.split(';')[0] ?? '';
   });
 
   afterEach(async () => {
@@ -54,7 +56,9 @@ describe('Auth - Logout (e2e)', () => {
       .set('Cookie', [accessTokenCookie])
       .expect(200);
 
-    const cookies = response.headers['set-cookie'];
+    const cookies = Array.isArray(response.headers['set-cookie'])
+      ? response.headers['set-cookie']
+      : [];
 
     const accessCookie = cookies.find((c: string) =>
       c.startsWith(`${COOKIE_NAME.ACCESS}=`),
@@ -70,7 +74,7 @@ describe('Auth - Logout (e2e)', () => {
 
     const dbUser = await userRepository.findByEmail(userData.email);
     expect(dbUser).not.toBeNull();
-    expect(dbUser!.hashedRefreshToken).toBeNull();
+    expect(dbUser!.hashedRefreshToken).toBeUndefined();
   });
 
   it('should return 401 (or 403) when logging out without access token', async () => {

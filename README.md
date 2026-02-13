@@ -52,7 +52,7 @@ $ yarn run test
 
 # e2e tests
 # first time: cp .env.test.example .env.test
-# ensure DB_ADMIN_USERNAME / DB_ADMIN_PASSWORD can create/drop test databases
+# ensure DB_ADMIN_USERNAME / DB_ADMIN_PASSWORD can create/drop databases and grant privileges
 # database creation and migrations are automatic before test execution
 $ yarn run test:e2e
 

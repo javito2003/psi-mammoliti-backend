@@ -37,19 +37,17 @@ describe('Professionals - Get All (e2e)', () => {
     expect(response.body.meta.page).toBe(1);
     expect(response.body.meta.limit).toBe(10);
 
-    professionalsCreated.forEach((prof) => {
-      const found = response.body.data.find(
-        (p: ProfessionalResponseDto) => p.id === prof.id,
-      );
+    response.body.data.forEach((prof: ProfessionalResponseDto) => {
+      const found = professionalsCreated.find((p) => p.id === prof.id);
 
       expect(found).toBeTruthy();
-      expect(found).toEqual<ProfessionalResponseDto>({
-        id: prof.id,
-        firstName: prof.user.firstName,
-        lastName: prof.user.lastName,
-        bio: prof.bio,
-        price: prof.price,
-        timezone: prof.timezone,
+      expect(prof).toEqual<ProfessionalResponseDto>({
+        id: found!.id,
+        firstName: found!.user.firstName,
+        lastName: found!.user.lastName,
+        bio: found!.bio,
+        price: found!.price,
+        timezone: found!.timezone,
         themes: prof.themes.map((t) => ({
           id: t.id,
           name: t.name,

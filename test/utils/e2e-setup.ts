@@ -3,7 +3,6 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../src/app.module';
 import { setupApp } from '../../src/setup-app';
 import { DataSource } from 'typeorm';
-import { Connection } from 'mysql2';
 
 export interface TestContext {
   app: INestApplication;
@@ -47,8 +46,11 @@ export async function closeTestApp(): Promise<void> {
     return;
   }
 
+  if (testContext.connection.isInitialized) {
+    await testContext.connection.destroy();
+  }
+
   await testContext.app.close();
-  await testContext.connection.destroy();
   testContext = null;
 }
 
