@@ -15,7 +15,11 @@ async function bootstrap() {
         }),
   });
 
-  app.enableCors({ origin: 'http://localhost:3000', credentials: true });
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',')
+    : ['http://localhost:3000'];
+
+  app.enableCors({ origin: allowedOrigins, credentials: true });
 
   setupApp(app);
 
