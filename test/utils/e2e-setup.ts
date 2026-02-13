@@ -21,7 +21,7 @@ export async function createTestApp(): Promise<TestContext> {
     imports: [AppModule],
   }).compile();
 
-  const app = moduleFixture.createNestApplication();
+  const app = moduleFixture.createNestApplication({ logger: false });
   setupApp(app);
   await app.init();
 
