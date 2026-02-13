@@ -1,9 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   USER_REPOSITORY,
   type UserRepositoryPort,
 } from '../../domain/ports/user.repository.port';
-import { UserResponseDto } from '../dtos/user-response.dto';
+import { UserNotFoundError } from '../../domain/exceptions/users.error';
+import { UserEntity } from '../../domain/entities/user.entity';
 
 @Injectable()
 export class GetUserProfileUseCase {
@@ -12,12 +13,12 @@ export class GetUserProfileUseCase {
     private readonly userRepository: UserRepositoryPort,
   ) {}
 
-  async execute(userId: string): Promise<UserResponseDto> {
+  async execute(userId: string): Promise<UserEntity> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UserNotFoundError(userId);
     }
 
-    return new UserResponseDto(user);
+    return user;
   }
 }

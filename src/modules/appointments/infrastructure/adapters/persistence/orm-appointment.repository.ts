@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { AppointmentEntity } from '../../../domain/entities/appointment.entity';
 import { AppointmentRepositoryPort } from '../../../domain/ports/appointment.repository.port';
+import {
+  type RepositoryFindOptions,
+  type RepositoryFindResult,
+} from 'src/modules/shared/domain/interfaces/repository-options.interface';
+import { SortOrder } from 'src/modules/shared/domain/interfaces/query-options.interface';
 import { Appointment } from './appointment.schema';
+import { AppointmentMapper } from './appointment.mapper';
 
 @Injectable()
 export class OrmAppointmentRepository implements AppointmentRepositoryPort {
@@ -13,9 +19,9 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
   ) {}
 
   async save(appointment: AppointmentEntity): Promise<AppointmentEntity> {
-    const persistence = this.toPersistence(appointment);
+    const persistence = AppointmentMapper.toPersistence(appointment);
     const saved = await this.repository.save(persistence);
-    return this.toDomain(saved);
+    return AppointmentMapper.toDomain(saved);
   }
 
   async findByProfessionalIdAndDateRange(
@@ -26,35 +32,35 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
     const entities = await this.repository.find({
       where: {
         professionalId,
-        startAt: Between(start, end),
+        startAt: LessThan(end),
+        endAt: MoreThan(start),
       },
     });
-    return entities.map((e) => this.toDomain(e));
+    return entities.map((e) => AppointmentMapper.toDomain(e));
   }
 
-  private toDomain(schema: Appointment): AppointmentEntity {
-    return new AppointmentEntity({
-      id: schema.id,
-      professionalId: schema.professionalId,
-      userId: schema.userId,
-      startAt: schema.startAt,
-      endAt: schema.endAt,
-      status: schema.status,
-      createdAt: schema.createdAt,
-      updatedAt: schema.updatedAt,
+  async findByUserId(
+    userId: string,
+    query: RepositoryFindOptions,
+  ): Promise<RepositoryFindResult<AppointmentEntity>> {
+    const {
+      offset,
+      limit,
+      sortBy = 'startAt',
+      sortOrder = SortOrder.DESC,
+    } = query;
+
+    const [entities, total] = await this.repository.findAndCount({
+      where: { userId },
+      relations: ['professional', 'professional.user'],
+      order: { [sortBy]: sortOrder },
+      skip: offset,
+      take: limit,
     });
-  }
 
-  private toPersistence(domain: AppointmentEntity): Appointment {
-    const schema = new Appointment();
-    schema.id = domain.id;
-    schema.professionalId = domain.professionalId;
-    schema.userId = domain.userId;
-    schema.startAt = domain.startAt;
-    schema.endAt = domain.endAt;
-    schema.status = domain.status;
-    schema.createdAt = domain.createdAt;
-    schema.updatedAt = domain.updatedAt;
-    return schema;
+    return {
+      data: entities.map((e) => AppointmentMapper.toDomain(e)),
+      total,
+    };
   }
 }

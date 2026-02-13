@@ -1,7 +1,10 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 
-config();
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+config({ path: '.env' });
+config({ path: isTestEnv ? '.env.test' : '.env', override: true });
 
 export default new DataSource({
   type: 'mysql',

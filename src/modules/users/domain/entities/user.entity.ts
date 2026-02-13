@@ -1,4 +1,7 @@
-export class UserEntity {
+export const USER_PASSWORD_MIN_LENGTH = 6;
+export const USER_PASSWORD_MAX_LENGTH = 16;
+
+export interface UserEntity {
   id: string;
   firstName: string;
   lastName: string;
@@ -7,8 +10,9 @@ export class UserEntity {
   hashedRefreshToken?: string;
   createdAt: Date;
   updatedAt: Date;
-
-  constructor(partial: Partial<UserEntity>) {
-    Object.assign(this, partial);
-  }
 }
+
+export type UserPublicEntity = Omit<
+  UserEntity,
+  'password' | 'hashedRefreshToken'
+>;

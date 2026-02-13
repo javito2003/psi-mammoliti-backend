@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from '../../modules/users/domain/entities/user.entity';
 import { UserCreator } from '../../modules/users/domain/services/user-creator.service';
+import { UserAlreadyExistsError } from '../../modules/users/domain/exceptions/users.error';
 import { ProfessionalEntity } from '../../modules/professionals/domain/entities/professional.entity';
 import {
   AvailabilityBlock,
@@ -34,7 +35,7 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Specialist in Anxiety and Depression with 10 years experience.',
     price: 80.0,
-    timezone: 'UTC-5',
+    timezone: 'America/Argentina/Buenos_Aires',
     themes: ['anxiety', 'depression'],
     availability: [
       { dayOfWeek: 1, block: AvailabilityBlock.MORNING }, // Mon Morning
@@ -50,7 +51,7 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Relationship counselor focusing on communication.',
     price: 100.0,
-    timezone: 'UTC+1',
+    timezone: 'America/Argentina/Buenos_Aires',
     themes: ['relationships', 'grief'],
     availability: [
       { dayOfWeek: 2, block: AvailabilityBlock.EVENING }, // Tue Evening
@@ -65,7 +66,7 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Trauma specialist. Helping you find your strength.',
     price: 120.0,
-    timezone: 'UTC-8',
+    timezone: 'America/New_York',
     themes: ['trauma', 'anxiety', 'personal-growth'],
     availability: [
       { dayOfWeek: 1, block: AvailabilityBlock.AFTERNOON }, // Mon Afternoon
@@ -99,11 +100,12 @@ export class SeedService {
 
     for (const themeData of THEMES) {
       if (!existingSlugs.has(themeData.slug)) {
-        const theme = new ThemeEntity({
+        const theme: ThemeEntity = {
           id: uuidv4(),
           name: themeData.name,
           slug: themeData.slug,
-        });
+        };
+
         const saved = await this.themeRepo.save(theme);
         savedThemes[saved.slug] = saved;
         this.logger.log(`Created Theme: ${saved.name}`);
@@ -128,10 +130,9 @@ export class SeedService {
             pData.password,
           );
           this.logger.log(`Created User: ${user.email}`);
-        } catch (e: any) {
-          if (e.message === 'User already exists') {
+        } catch (e) {
+          if (e instanceof UserAlreadyExistsError) {
             this.logger.log(`User already exists: ${pData.email}, skipping.`);
-            // In a real seeder, find user by email. Here we just skip to avoid complexity.
             continue;
           }
           throw e;
@@ -153,7 +154,7 @@ export class SeedService {
             }),
         );
 
-        const professional = new ProfessionalEntity({
+        const professional: ProfessionalEntity = {
           id: uuidv4(),
           userId: user.id,
           bio: pData.bio,
@@ -163,7 +164,7 @@ export class SeedService {
           availability: availability,
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        };
 
         await this.professionalRepo.save(professional);
         this.logger.log(`Created Professional Profile for: ${user.email}`);

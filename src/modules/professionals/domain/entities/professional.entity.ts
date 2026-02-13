@@ -1,11 +1,11 @@
-import { UserEntity } from '../../../users/domain/entities/user.entity';
+import { UserPublicEntity } from '../../../users/domain/entities/user.entity';
 import { ThemeEntity } from '../../../themes/domain/entities/theme.entity';
 import { ProfessionalAvailabilityEntity } from './professional-availability.entity';
 
-export class ProfessionalEntity {
+export interface ProfessionalEntity {
   id: string;
   userId: string;
-  user?: UserEntity;
+  user?: UserPublicEntity;
   bio: string;
   price: number;
   timezone: string;
@@ -13,8 +13,4 @@ export class ProfessionalEntity {
   availability: ProfessionalAvailabilityEntity[];
   createdAt: Date;
   updatedAt: Date;
-
-  constructor(partial: Partial<ProfessionalEntity>) {
-    Object.assign(this, partial);
-  }
 }

@@ -17,7 +17,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:db:create": "NODE_ENV=test node ./scripts/create-test-db.js",
+    "test:db:drop": "NODE_ENV=test node ./scripts/drop-test-db.js",
+    "test:db:migrate": "NODE_ENV=test yarn migration:run",
+    "test:e2e": "yarn test:db:create && yarn test:db:migrate && NODE_ENV=test jest --detectOpenHandles --runInBand --config ./test/jest-e2e.json",
     "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/modules/shared/infrastructure/database/data-source.ts",
     "migration:generate": "yarn typeorm migration:generate",
@@ -48,6 +51,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@faker-js/faker": "^10.3.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
@@ -88,6 +92,12 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(uuid|@faker-js/faker))"
+    ],
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   }
 }

@@ -1,0 +1,90 @@
+import request from 'supertest';
+import { RegisterUserDto } from '../../src/modules/auth/application/dtos/register-user.dto';
+import { faker } from '@faker-js/faker';
+import { COOKIE_NAME } from '../../src/modules/auth/infrastructure/auth.constants';
+import { cleanupDatabase, getTestApp } from '../utils/e2e-setup';
+import { USER_PASSWORD_MIN_LENGTH } from '../../src/modules/users/domain/entities/user.entity';
+import {
+  USER_REPOSITORY,
+  type UserRepositoryPort,
+} from '../../src/modules/users/domain/ports/user.repository.port';
+
+describe('Auth - Refresh (e2e)', () => {
+  let refreshTokenCookie: string;
+  let userRepository: UserRepositoryPort;
+
+  const userData: RegisterUserDto = {
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
+    email: faker.internet.email().toLowerCase(),
+    password: faker.string.alpha(USER_PASSWORD_MIN_LENGTH),
+  };
+
+  beforeAll(() => {
+    userRepository = getTestApp().get<UserRepositoryPort>(USER_REPOSITORY);
+  });
+
+  beforeEach(async () => {
+    // Register
+    await request(getTestApp().getHttpServer())
+      .post('/auth/register')
+      .send(userData)
+      .expect(201);
+
+    // Login
+    const loginResponse = await request(getTestApp().getHttpServer())
+      .post('/auth/login')
+      .send({ email: userData.email, password: userData.password })
+      .expect(201);
+
+    const cookies = loginResponse.headers['set-cookie'];
+    const refreshCookie = cookies.find((c: string) =>
+      c.startsWith(COOKIE_NAME.REFRESH),
+    );
+    refreshTokenCookie = refreshCookie.split(';')[0];
+  });
+
+  afterEach(async () => {
+    await cleanupDatabase();
+  });
+
+  it('should refresh tokens successfully (201)', async () => {
+    const userBeforeRefresh = await userRepository.findByEmail(userData.email);
+    const tokenBeforeRefresh = userBeforeRefresh!.hashedRefreshToken;
+
+    const response = await request(getTestApp().getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', [refreshTokenCookie])
+      .expect(201);
+
+    const cookies = response.headers['set-cookie'];
+    expect(cookies).toBeDefined();
+
+    const newAccessCookie = cookies.find((c: string) =>
+      c.startsWith(COOKIE_NAME.ACCESS),
+    );
+    const newRefreshCookie = cookies.find((c: string) =>
+      c.startsWith(COOKIE_NAME.REFRESH),
+    );
+
+    expect(newAccessCookie).toBeDefined();
+    expect(newRefreshCookie).toBeDefined();
+
+    const userAfterRefresh = await userRepository.findByEmail(userData.email);
+    expect(userAfterRefresh!.hashedRefreshToken).toBeDefined();
+    expect(userAfterRefresh!.hashedRefreshToken).not.toBe(tokenBeforeRefresh);
+  });
+
+  it('should return 401 when refreshing without cookie', async () => {
+    return request(getTestApp().getHttpServer())
+      .post('/auth/refresh')
+      .expect(401);
+  });
+
+  it('should return 401 when refreshing with invalid cookie', async () => {
+    return request(getTestApp().getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', [`${COOKIE_NAME.REFRESH}=invalidtoken`])
+      .expect(401);
+  });
+});
