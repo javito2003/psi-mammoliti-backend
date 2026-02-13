@@ -1,9 +1,8 @@
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { RegisterUserDto } from '../../src/modules/auth/application/dtos/register-user.dto';
 import { faker } from '@faker-js/faker';
 import { COOKIE_NAME } from '../../src/modules/auth/infrastructure/auth.constants';
-import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import { cleanupDatabase, getTestApp } from '../utils/e2e-setup';
 import { USER_PASSWORD_MIN_LENGTH } from '../../src/modules/users/domain/entities/user.entity';
 import {
   USER_REPOSITORY,
@@ -11,7 +10,6 @@ import {
 } from '../../src/modules/users/domain/ports/user.repository.port';
 
 describe('Auth - Logout (e2e)', () => {
-  let app: INestApplication;
   let accessTokenCookie: string;
   let userRepository: UserRepositoryPort;
 
@@ -22,21 +20,19 @@ describe('Auth - Logout (e2e)', () => {
     password: faker.string.alpha(USER_PASSWORD_MIN_LENGTH),
   };
 
-  beforeAll(async () => {
-    const context = await createTestApp();
-    app = context.app;
-    userRepository = app.get<UserRepositoryPort>(USER_REPOSITORY);
+  beforeAll(() => {
+    userRepository = getTestApp().get<UserRepositoryPort>(USER_REPOSITORY);
   });
 
   beforeEach(async () => {
     // Register
-    await request(app.getHttpServer())
+    await request(getTestApp().getHttpServer())
       .post('/auth/register')
       .send(userData)
       .expect(201);
 
     // Login
-    const loginResponse = await request(app.getHttpServer())
+    const loginResponse = await request(getTestApp().getHttpServer())
       .post('/auth/login')
       .send({ email: userData.email, password: userData.password })
       .expect(201);
@@ -49,16 +45,11 @@ describe('Auth - Logout (e2e)', () => {
   });
 
   afterEach(async () => {
-    await cleanupDatabase(app);
-  });
-
-  afterAll(async (done) => {
-    await app.close();
-    done();
+    await cleanupDatabase();
   });
 
   it('should logout successfully (200)', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .post('/auth/logout')
       .set('Cookie', [accessTokenCookie])
       .expect(200);
@@ -83,6 +74,8 @@ describe('Auth - Logout (e2e)', () => {
   });
 
   it('should return 401 (or 403) when logging out without access token', async () => {
-    return request(app.getHttpServer()).post('/auth/logout').expect(401);
+    return request(getTestApp().getHttpServer())
+      .post('/auth/logout')
+      .expect(401);
   });
 });

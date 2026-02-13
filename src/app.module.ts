@@ -10,6 +10,8 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/shared/infrastructure/database/database.module';
 import databaseConfig from './modules/shared/infrastructure/database/database.config';
 
+const isTestEnv = process.env.NODE_ENV === 'test';
+
 @Module({
   imports: [
     UsersModule,
@@ -19,6 +21,7 @@ import databaseConfig from './modules/shared/infrastructure/database/database.co
     AppointmentsModule,
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: isTestEnv ? ['.env.test', '.env'] : '.env',
       load: [databaseConfig],
     }),
     DatabaseModule,

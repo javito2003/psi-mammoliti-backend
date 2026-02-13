@@ -1,6 +1,5 @@
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import { cleanupDatabase, getTestApp } from '../utils/e2e-setup';
 import { DataSource } from 'typeorm';
 import { ProfessionalFactory } from '../utils/factories/professional.factory';
 import { AppointmentFactory } from '../utils/factories/appointment.factory';
@@ -9,25 +8,18 @@ import { AvailabilityBlock } from '../../src/modules/professionals/domain/entiti
 import { v4 as uuidv4 } from 'uuid';
 
 describe('Appointments - Get Availability (e2e)', () => {
-  let app: INestApplication;
   let dataSource: DataSource;
   let professionalFactory: ProfessionalFactory;
   let appointmentFactory: AppointmentFactory;
 
-  beforeAll(async () => {
-    const context = await createTestApp();
-    app = context.app;
-    dataSource = app.get(DataSource);
+  beforeAll(() => {
+    dataSource = getTestApp().get(DataSource);
     professionalFactory = new ProfessionalFactory(dataSource);
     appointmentFactory = new AppointmentFactory(dataSource);
   });
 
   afterEach(async () => {
-    await cleanupDatabase(app);
-  });
-
-  afterAll(async () => {
-    await app.close();
+    await cleanupDatabase();
   });
 
   it('should return available slots', async () => {
@@ -53,7 +45,7 @@ describe('Appointments - Get Availability (e2e)', () => {
     }
     const weekStart = d.toISOString();
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .get(`/professionals/${professional.id}/appointments/availability`)
       .query({ weekStart })
       .expect(200);
@@ -86,7 +78,7 @@ describe('Appointments - Get Availability (e2e)', () => {
     d.setDate(d.getDate() + 7);
     const weekStart = d.toISOString();
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .get(`/professionals/${professional.id}/appointments/availability`)
       .query({ weekStart })
       .expect(200);
@@ -133,7 +125,7 @@ describe('Appointments - Get Availability (e2e)', () => {
 
     const weekStart = d.toISOString();
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .get(`/professionals/${professional.id}/appointments/availability`)
       .query({ weekStart })
       .expect(200);

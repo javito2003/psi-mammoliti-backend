@@ -3,13 +3,21 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../../src/app.module';
 import { setupApp } from '../../src/setup-app';
 import { DataSource } from 'typeorm';
+import { Connection } from 'mysql2';
 
 export interface TestContext {
   app: INestApplication;
   module: TestingModule;
+  connection: DataSource;
 }
 
+let testContext: TestContext | null = null;
+
 export async function createTestApp(): Promise<TestContext> {
+  if (testContext) {
+    return testContext;
+  }
+
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
@@ -18,10 +26,33 @@ export async function createTestApp(): Promise<TestContext> {
   setupApp(app);
   await app.init();
 
-  return { app, module: moduleFixture };
+  testContext = {
+    app,
+    module: moduleFixture,
+    connection: moduleFixture.get(DataSource),
+  };
+  return testContext;
 }
 
-export async function cleanupDatabase(app: INestApplication) {
+export function getTestApp(): INestApplication {
+  if (!testContext) {
+    throw new Error('Test app is not initialized. Call createTestApp() first.');
+  }
+
+  return testContext.app;
+}
+
+export async function closeTestApp(): Promise<void> {
+  if (!testContext) {
+    return;
+  }
+
+  await testContext.app.close();
+  await testContext.connection.destroy();
+  testContext = null;
+}
+
+export async function cleanupDatabase(app: INestApplication = getTestApp()) {
   const dataSource = app.get(DataSource);
   const queryRunner = dataSource.createQueryRunner();
   await queryRunner.connect();

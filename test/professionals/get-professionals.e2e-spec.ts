@@ -1,34 +1,23 @@
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import { cleanupDatabase, getTestApp } from '../utils/e2e-setup';
 import { DataSource } from 'typeorm';
 import { ProfessionalFactory } from '../utils/factories/professional.factory';
 import { ThemeFactory } from '../utils/factories/theme.factory';
-import { PaginatedResponseDto } from '../../src/modules/shared/infrastructure/adapter/http/dtos/paginated-response.dto';
-import { ProfessionalEntity } from '../../src/modules/professionals/domain/entities/professional.entity';
 import { ProfessionalResponseDto } from '../../src/modules/professionals/infrastructure/adapters/http/dtos/professional-response.dto';
 
 describe('Professionals - Get All (e2e)', () => {
-  let app: INestApplication;
   let dataSource: DataSource;
   let professionalFactory: ProfessionalFactory;
   let themeFactory: ThemeFactory;
 
-  beforeAll(async () => {
-    const context = await createTestApp();
-    app = context.app;
-    dataSource = app.get(DataSource);
+  beforeAll(() => {
+    dataSource = getTestApp().get(DataSource);
     professionalFactory = new ProfessionalFactory(dataSource);
     themeFactory = new ThemeFactory(dataSource);
   });
 
   afterEach(async () => {
-    await cleanupDatabase(app);
-  });
-
-  afterAll(async (done) => {
-    await app.close();
-    done();
+    await cleanupDatabase();
   });
 
   it('should respect pagination limit', async () => {
@@ -37,7 +26,7 @@ describe('Professionals - Get All (e2e)', () => {
       .map(() => professionalFactory.create());
     const professionalsCreated = await Promise.all(promises);
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .get('/professionals')
       .query({ page: 1, limit: 10 })
       .expect(200);
@@ -49,9 +38,9 @@ describe('Professionals - Get All (e2e)', () => {
     expect(response.body.meta.limit).toBe(10);
 
     professionalsCreated.forEach((prof) => {
-      const found = response.body.data.some(
+      const found = response.body.data.find(
         (p: ProfessionalResponseDto) => p.id === prof.id,
-      ) as ProfessionalResponseDto;
+      );
 
       expect(found).toBeTruthy();
       expect(found).toEqual<ProfessionalResponseDto>({
@@ -70,19 +59,16 @@ describe('Professionals - Get All (e2e)', () => {
   });
 
   it('should return correct page (offset)', async () => {
-    // Create 3 professionals sequentially to ensure order (if sorted by createdAt)
     await professionalFactory.create();
     await professionalFactory.create();
     await professionalFactory.create();
 
-    // Page 1 (limit 2)
-    const responsePage1 = await request(app.getHttpServer())
+    const responsePage1 = await request(getTestApp().getHttpServer())
       .get('/professionals')
       .query({ page: 1, limit: 2 })
       .expect(200);
 
-    // Page 2 (limit 2)
-    const responsePage2 = await request(app.getHttpServer())
+    const responsePage2 = await request(getTestApp().getHttpServer())
       .get('/professionals')
       .query({ page: 2, limit: 2 })
       .expect(200);
@@ -90,10 +76,9 @@ describe('Professionals - Get All (e2e)', () => {
     expect(responsePage1.body.data).toHaveLength(2);
     expect(responsePage2.body.data).toHaveLength(1);
 
-    const idsPage1 = responsePage1.body.data.map((p: any) => p.id);
-    const idsPage2 = responsePage2.body.data.map((p: any) => p.id);
+    const idsPage1 = responsePage1.body.data.map((p: { id: string }) => p.id);
+    const idsPage2 = responsePage2.body.data.map((p: { id: string }) => p.id);
 
-    // Verify disjoint sets
     expect(idsPage1).not.toContain(idsPage2[0]);
   });
 
@@ -109,9 +94,9 @@ describe('Professionals - Get All (e2e)', () => {
 
     await professionalFactory.create({ themes: [theme1] });
     await professionalFactory.create({ themes: [theme2] });
-    await professionalFactory.create(); // No theme
+    await professionalFactory.create();
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .get('/professionals')
       .query({ theme: 'anxiety' })
       .expect(200);

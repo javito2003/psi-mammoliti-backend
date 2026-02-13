@@ -1,10 +1,9 @@
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { RegisterUserDto } from '../../src/modules/auth/application/dtos/register-user.dto';
 import { LoginUserDto } from '../../src/modules/auth/application/dtos/login-user.dto';
 import { faker } from '@faker-js/faker';
 import { COOKIE_NAME } from '../../src/modules/auth/infrastructure/auth.constants';
-import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import { cleanupDatabase, getTestApp } from '../utils/e2e-setup';
 import { USER_PASSWORD_MIN_LENGTH } from '../../src/modules/users/domain/entities/user.entity';
 import {
   USER_REPOSITORY,
@@ -12,7 +11,6 @@ import {
 } from '../../src/modules/users/domain/ports/user.repository.port';
 
 describe('Auth - Login (e2e)', () => {
-  let app: INestApplication;
   let userRepository: UserRepositoryPort;
 
   const userData: RegisterUserDto = {
@@ -22,27 +20,20 @@ describe('Auth - Login (e2e)', () => {
     password: faker.string.alpha(USER_PASSWORD_MIN_LENGTH),
   };
 
-  beforeAll(async () => {
-    const context = await createTestApp();
-    app = context.app;
-    userRepository = app.get<UserRepositoryPort>(USER_REPOSITORY);
+  beforeAll(() => {
+    userRepository = getTestApp().get<UserRepositoryPort>(USER_REPOSITORY);
   });
 
   beforeEach(async () => {
     // Pre-register user before each test to ensure clean state
-    await request(app.getHttpServer())
+    await request(getTestApp().getHttpServer())
       .post('/auth/register')
       .send(userData)
       .expect(201);
   });
 
   afterEach(async () => {
-    await cleanupDatabase(app);
-  });
-
-  afterAll(async (done) => {
-    await app.close();
-    done();
+    await cleanupDatabase();
   });
 
   it('should login successfully and set cookies (201)', async () => {
@@ -51,7 +42,7 @@ describe('Auth - Login (e2e)', () => {
       password: userData.password,
     };
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .post('/auth/login')
       .send(loginDto)
       .expect(201);
@@ -77,7 +68,7 @@ describe('Auth - Login (e2e)', () => {
   });
 
   it('should return 401 when logging in with wrong password', async () => {
-    return request(app.getHttpServer())
+    return request(getTestApp().getHttpServer())
       .post('/auth/login')
       .send({
         email: userData.email,
@@ -87,7 +78,7 @@ describe('Auth - Login (e2e)', () => {
   });
 
   it('should return 401 when logging in with non-existent email', async () => {
-    return request(app.getHttpServer())
+    return request(getTestApp().getHttpServer())
       .post('/auth/login')
       .send({
         email: faker.internet.email(),

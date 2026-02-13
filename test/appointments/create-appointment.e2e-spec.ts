@@ -1,6 +1,5 @@
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import { cleanupDatabase, getTestApp } from '../utils/e2e-setup';
 import { DataSource } from 'typeorm';
 import { ProfessionalFactory } from '../utils/factories/professional.factory';
 import { AppointmentFactory } from '../utils/factories/appointment.factory';
@@ -13,26 +12,19 @@ import { AppointmentStatus } from '../../src/modules/appointments/domain/entitie
 import { v4 as uuidv4 } from 'uuid';
 
 describe('Appointments - Create Appointment (e2e)', () => {
-  let app: INestApplication;
   let dataSource: DataSource;
   let professionalFactory: ProfessionalFactory;
   let appointmentFactory: AppointmentFactory;
   let accessTokenCookie: string;
 
-  beforeAll(async () => {
-    const context = await createTestApp();
-    app = context.app;
-    dataSource = app.get(DataSource);
+  beforeAll(() => {
+    dataSource = getTestApp().get(DataSource);
     professionalFactory = new ProfessionalFactory(dataSource);
     appointmentFactory = new AppointmentFactory(dataSource);
   });
 
   afterEach(async () => {
-    await cleanupDatabase(app);
-  });
-
-  afterAll(async () => {
-    await app.close();
+    await cleanupDatabase();
   });
 
   beforeEach(async () => {
@@ -43,12 +35,12 @@ describe('Appointments - Create Appointment (e2e)', () => {
       password: 'password123',
     };
 
-    await request(app.getHttpServer())
+    await request(getTestApp().getHttpServer())
       .post('/auth/register')
       .send(userData)
       .expect(201);
 
-    const loginResp = await request(app.getHttpServer())
+    const loginResp = await request(getTestApp().getHttpServer())
       .post('/auth/login')
       .send({ email: userData.email, password: userData.password })
       .expect(201);
@@ -81,7 +73,7 @@ describe('Appointments - Create Appointment (e2e)', () => {
     }
     d.setHours(9, 0, 0, 0);
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .post(`/professionals/${professional.id}/appointments`)
       .set('Cookie', [accessTokenCookie])
       .send({ startAt: d.toISOString() })
@@ -127,7 +119,7 @@ describe('Appointments - Create Appointment (e2e)', () => {
     });
 
     // Try to book the same slot
-    await request(app.getHttpServer())
+    await request(getTestApp().getHttpServer())
       .post(`/professionals/${professional.id}/appointments`)
       .set('Cookie', [accessTokenCookie])
       .send({ startAt: d.toISOString() })

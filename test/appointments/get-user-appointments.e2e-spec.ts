@@ -1,6 +1,5 @@
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
+import { cleanupDatabase, getTestApp } from '../utils/e2e-setup';
 import { DataSource } from 'typeorm';
 import { AppointmentFactory } from '../utils/factories/appointment.factory';
 import { ProfessionalFactory } from '../utils/factories/professional.factory';
@@ -11,7 +10,6 @@ import { User } from '../../src/modules/users/infrastructure/adapters/persistenc
 import { AppointmentStatus } from '../../src/modules/appointments/domain/entities/appointment.entity';
 
 describe('Appointments - Get User Appointments (e2e)', () => {
-  let app: INestApplication;
   let dataSource: DataSource;
   let appointmentFactory: AppointmentFactory;
   let professionalFactory: ProfessionalFactory;
@@ -19,20 +17,14 @@ describe('Appointments - Get User Appointments (e2e)', () => {
   let accessTokenCookie: string;
   let user: User;
 
-  beforeAll(async () => {
-    const context = await createTestApp();
-    app = context.app;
-    dataSource = app.get(DataSource);
+  beforeAll(() => {
+    dataSource = getTestApp().get(DataSource);
     appointmentFactory = new AppointmentFactory(dataSource);
     professionalFactory = new ProfessionalFactory(dataSource);
   });
 
   afterEach(async () => {
-    await cleanupDatabase(app);
-  });
-
-  afterAll(async () => {
-    await app.close();
+    await cleanupDatabase();
   });
 
   beforeEach(async () => {
@@ -44,12 +36,12 @@ describe('Appointments - Get User Appointments (e2e)', () => {
       password: 'password123',
     };
 
-    await request(app.getHttpServer())
+    await request(getTestApp().getHttpServer())
       .post('/auth/register')
       .send(userData)
       .expect(201);
 
-    const loginResp = await request(app.getHttpServer())
+    const loginResp = await request(getTestApp().getHttpServer())
       .post('/auth/login')
       .send({ email: userData.email, password: userData.password })
       .expect(201);
@@ -70,7 +62,7 @@ describe('Appointments - Get User Appointments (e2e)', () => {
     await appointmentFactory.create({ user, professional });
     await appointmentFactory.create({ user, professional });
 
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .get('/appointments')
       .set('Cookie', [accessTokenCookie])
       .query({ page: 1, limit: 10 })
@@ -92,7 +84,7 @@ describe('Appointments - Get User Appointments (e2e)', () => {
   });
 
   it('should return empty list when no appointments exist', async () => {
-    const response = await request(app.getHttpServer())
+    const response = await request(getTestApp().getHttpServer())
       .get('/appointments')
       .set('Cookie', [accessTokenCookie])
       .expect(200);
