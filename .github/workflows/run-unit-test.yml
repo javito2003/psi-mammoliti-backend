@@ -4,15 +4,15 @@ on: push
 
 jobs:
   run-unit-tests:
-    name: Run Unit Tests and Deploy to DigitalOcean Container Registry
+    name: Run Unit Tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '24.11.0'
       

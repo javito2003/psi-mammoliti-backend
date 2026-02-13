@@ -4,8 +4,18 @@ import { AppointmentRepositoryPort } from '../../domain/ports/appointment.reposi
 import { ProfessionalRepositoryPort } from '../../../professionals/domain/ports/professional.repository.port';
 import { AppointmentStatus } from '../../domain/entities/appointment.entity';
 import { ProfessionalEntity } from '../../../professionals/domain/entities/professional.entity';
+import { AvailabilityBlock } from '../../../professionals/domain/entities/professional-availability.entity';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
 import { AppointmentAlreadyBookedError } from '../../domain/exceptions/appointments.error';
+
+function nextMonday9AM(): Date {
+  const now = new Date();
+  const daysUntilMonday = (8 - now.getDay()) % 7 || 7;
+  const date = new Date(now);
+  date.setDate(date.getDate() + daysUntilMonday);
+  date.setHours(9, 0, 0, 0);
+  return date;
+}
 
 describe('CreateAppointmentUseCase', () => {
   let useCase: CreateAppointmentUseCase;
@@ -29,22 +39,36 @@ describe('CreateAppointmentUseCase', () => {
     useCase = new CreateAppointmentUseCase(appointmentRepo, professionalRepo);
   });
 
-  const buildProfessional = (): ProfessionalEntity => ({
-    id: faker.string.uuid(),
-    userId: faker.string.uuid(),
-    bio: faker.lorem.sentence(),
-    price: faker.number.int({ min: 10, max: 300 }),
-    timezone: 'America/Argentina/Buenos_Aires',
-    themes: [],
-    availability: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  const buildProfessional = (): ProfessionalEntity => {
+    const profId = faker.string.uuid();
+    return {
+      id: profId,
+      userId: faker.string.uuid(),
+      bio: faker.lorem.sentence(),
+      price: faker.number.int({ min: 10, max: 300 }),
+      timezone: 'America/Argentina/Buenos_Aires',
+      themes: [],
+      availability: [
+        {
+          id: faker.string.uuid(),
+          professionalId: profId,
+          dayOfWeek: 1, // Monday — matches 2026-02-16
+          block: AvailabilityBlock.MORNING,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  };
 
   it('should create and persist a confirmed appointment when slot is available', async () => {
     const professional = buildProfessional();
     const userId = faker.string.uuid();
-    const startAt = '2026-02-16T09:00:00.000Z';
+    const startDate = nextMonday9AM();
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 1);
 
     professionalRepo.findById.mockResolvedValue(professional);
     appointmentRepo.findByProfessionalIdAndDateRange.mockResolvedValue([]);
@@ -52,25 +76,23 @@ describe('CreateAppointmentUseCase', () => {
       Promise.resolve(appointment),
     );
 
-    const result = await useCase.execute(professional.id, userId, startAt);
+    const result = await useCase.execute(
+      professional.id,
+      userId,
+      startDate.toISOString(),
+    );
 
     expect(professionalRepo.findById).toHaveBeenCalledWith(professional.id);
     expect(
       appointmentRepo.findByProfessionalIdAndDateRange,
-    ).toHaveBeenCalledWith(
-      professional.id,
-      new Date(startAt),
-      new Date('2026-02-16T10:00:00.000Z'),
-    );
+    ).toHaveBeenCalledWith(professional.id, startDate, endDate);
     const savedAppointment = appointmentRepo.save.mock.calls[0]?.[0];
     expect(savedAppointment).toBeDefined();
     expect(savedAppointment?.id).toBeDefined();
     expect(savedAppointment?.professionalId).toBe(professional.id);
     expect(savedAppointment?.userId).toBe(userId);
-    expect(savedAppointment?.startAt).toEqual(new Date(startAt));
-    expect(savedAppointment?.endAt).toEqual(
-      new Date('2026-02-16T10:00:00.000Z'),
-    );
+    expect(savedAppointment?.startAt).toEqual(startDate);
+    expect(savedAppointment?.endAt).toEqual(endDate);
     expect(savedAppointment?.status).toBe(AppointmentStatus.CONFIRMED);
     expect(result.status).toBe(AppointmentStatus.CONFIRMED);
   });
@@ -97,7 +119,9 @@ describe('CreateAppointmentUseCase', () => {
   it('should throw AppointmentAlreadyBookedError when slot overlaps', async () => {
     const professional = buildProfessional();
     const userId = faker.string.uuid();
-    const startAt = '2026-02-16T09:00:00.000Z';
+    const startDate = nextMonday9AM();
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 1);
 
     professionalRepo.findById.mockResolvedValue(professional);
     appointmentRepo.findByProfessionalIdAndDateRange.mockResolvedValue([
@@ -105,8 +129,8 @@ describe('CreateAppointmentUseCase', () => {
         id: faker.string.uuid(),
         professionalId: professional.id,
         userId,
-        startAt: new Date(startAt),
-        endAt: new Date('2026-02-16T10:00:00.000Z'),
+        startAt: startDate,
+        endAt: endDate,
         status: AppointmentStatus.CONFIRMED,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -114,7 +138,7 @@ describe('CreateAppointmentUseCase', () => {
     ]);
 
     await expect(
-      useCase.execute(professional.id, userId, startAt),
+      useCase.execute(professional.id, userId, startDate.toISOString()),
     ).rejects.toThrow(AppointmentAlreadyBookedError);
 
     expect(appointmentRepo.save).not.toHaveBeenCalled();
