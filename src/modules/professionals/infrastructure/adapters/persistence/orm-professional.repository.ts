@@ -43,12 +43,17 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
       .leftJoinAndSelect('professional.availability', 'availability');
 
     if (filter.themeSlugs?.length) {
-      qb.innerJoin(
-        'professional.themes',
-        'filterTheme',
-        'filterTheme.slug IN (:...slugs)',
-        { slugs: filter.themeSlugs },
-      );
+      qb.andWhere((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('1')
+          .from('professional_themes', 'pt')
+          .innerJoin('themes', 't', 't.id = pt.theme_id')
+          .where('pt.professional_id = professional.id')
+          .andWhere('t.slug IN (:...slugs)')
+          .getQuery();
+        return `EXISTS ${subQuery}`;
+      }).setParameters({ slugs: filter.themeSlugs });
     }
 
     qb.orderBy(`professional.${sortBy}`, sortOrder).skip(offset).take(limit);

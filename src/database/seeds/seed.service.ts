@@ -66,7 +66,7 @@ const PROFESSIONALS = [
     password: 'Password123!',
     bio: 'Trauma specialist. Helping you find your strength.',
     price: 120.0,
-    timezone: 'America/United_States/New_York',
+    timezone: 'America/New_York',
     themes: ['trauma', 'anxiety', 'personal-growth'],
     availability: [
       { dayOfWeek: 1, block: AvailabilityBlock.AFTERNOON }, // Mon Afternoon
