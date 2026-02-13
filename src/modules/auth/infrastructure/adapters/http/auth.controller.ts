@@ -37,17 +37,19 @@ export class AuthController {
     accessToken: string,
     refreshToken: string,
   ) {
+    const isProduction = process.env.NODE_ENV === 'production';
+
     response.cookie(COOKIE_NAME.ACCESS, accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'strict',
       maxAge: ACCESS_TOKEN_EXPIRATION_MINUTES * 60 * 1000, // 15 minutes
     });
 
     response.cookie(COOKIE_NAME.REFRESH, refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'strict',
       maxAge: REFRESH_TOKEN_EXPIRATION_DAYS * 24 * 60 * 60 * 1000, // 7 days
       path: '/auth/refresh',
     });
