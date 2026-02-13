@@ -35,5 +35,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Wait for MySQL to be healthy
+        run: |
+          echo "Waiting for MySQL to be healthy..."
+          while ! mysqladmin ping -h127.0.0.1 -P3306 --silent; do
+            sleep 5
+          done
+          echo "MySQL is healthy!"
+      
+      - name: Copy .env.test.example to .env.test
+        run: cp .env.test.example .env.test
+
       - name: Run E2E tests
         run: yarn test:e2e
