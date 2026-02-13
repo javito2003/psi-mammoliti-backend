@@ -1,0 +1,26 @@
+name: Deploy to Production and Development
+
+on: push
+
+jobs:
+  run-unit-tests:
+    name: Run Unit Tests and Deploy to DigitalOcean Container Registry
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24.11.0'
+      
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run unit tests
+        run: yarn test
