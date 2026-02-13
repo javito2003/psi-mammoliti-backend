@@ -1,3 +1,3 @@
 export interface ProfessionalFilter {
-  themeSlug?: string;
+  themeSlugs?: string[];
 }

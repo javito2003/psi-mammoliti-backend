@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { AppointmentEntity } from '../../../domain/entities/appointment.entity';
 import { AppointmentRepositoryPort } from '../../../domain/ports/appointment.repository.port';
 import {
@@ -32,7 +32,8 @@ export class OrmAppointmentRepository implements AppointmentRepositoryPort {
     const entities = await this.repository.find({
       where: {
         professionalId,
-        startAt: Between(start, end),
+        startAt: LessThan(end),
+        endAt: MoreThan(start),
       },
     });
     return entities.map((e) => AppointmentMapper.toDomain(e));

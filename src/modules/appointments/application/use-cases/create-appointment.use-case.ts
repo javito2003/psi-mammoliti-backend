@@ -14,7 +14,12 @@ import {
 } from '../../domain/entities/appointment.entity';
 import { APPOINTMENT_DURATION_HOURS } from '../../domain/constants/availability-block.constants';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
-import { AppointmentAlreadyBookedError } from '../../domain/exceptions/appointments.error';
+import {
+  AppointmentAlreadyBookedError,
+  InvalidAppointmentTimeError,
+} from '../../domain/exceptions/appointments.error';
+import { isValidAppointment } from '../../domain/service/is-valid-appointment';
+import { setTime } from 'src/modules/shared/util/date.util';
 
 @Injectable()
 export class CreateAppointmentUseCase {
@@ -35,9 +40,16 @@ export class CreateAppointmentUseCase {
       throw new ProfessionalNotFoundError(professionalId);
     }
 
-    const startDate = new Date(startAt);
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + APPOINTMENT_DURATION_HOURS);
+    const startAtDate = new Date(startAt);
+    const startDate = setTime(startAtDate, startAtDate.getHours());
+    if (!isValidAppointment(startDate, professional.availability)) {
+      throw new InvalidAppointmentTimeError();
+    }
+
+    const endDate = setTime(
+      startDate,
+      startDate.getHours() + APPOINTMENT_DURATION_HOURS,
+    );
 
     const overlapping =
       await this.appointmentRepo.findByProfessionalIdAndDateRange(

@@ -9,3 +9,12 @@ export class AppointmentAlreadyBookedError extends DomainError {
     super('This appointment slot is already booked.');
   }
 }
+
+export const INVALID_APPOINTMENT_TIME_CODE = 'INVALID_APPOINTMENT_TIME';
+export class InvalidAppointmentTimeError extends DomainError {
+  readonly code = INVALID_APPOINTMENT_TIME_CODE;
+
+  constructor() {
+    super('The appointment time is invalid. It must be in the future.');
+  }
+}

@@ -42,12 +42,12 @@ export class OrmProfessionalRepository implements ProfessionalRepositoryPort {
       .leftJoinAndSelect('professional.themes', 'themes')
       .leftJoinAndSelect('professional.availability', 'availability');
 
-    if (filter.themeSlug) {
+    if (filter.themeSlugs?.length) {
       qb.innerJoin(
         'professional.themes',
         'filterTheme',
-        'filterTheme.slug = :slug',
-        { slug: filter.themeSlug },
+        'filterTheme.slug IN (:...slugs)',
+        { slugs: filter.themeSlugs },
       );
     }
 

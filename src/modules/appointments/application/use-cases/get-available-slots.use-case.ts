@@ -13,7 +13,7 @@ import {
   AvailabilityBlockHours,
   WEEK_DAYS,
 } from '../../domain/constants/availability-block.constants';
-import { setHour } from 'src/modules/shared/util/date.util';
+import { setTime } from 'src/modules/shared/util/date.util';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
 
 @Injectable()
@@ -26,8 +26,10 @@ export class GetAvailableSlotsUseCase {
   ) {}
 
   async execute(professionalId: string, weekStart?: string): Promise<string[]> {
-    const startDate = weekStart ? new Date(weekStart) : new Date();
-    setHour(startDate);
+    const startDate = weekStart
+      ? setTime(new Date(weekStart))
+      : setTime(new Date());
+
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + WEEK_DAYS);
 
@@ -62,7 +64,7 @@ export class GetAvailableSlotsUseCase {
         slots.push(...generatedSlots);
       }
 
-      loopDate.setDate(loopDate.getDate() + APPOINTMENT_DURATION_HOURS);
+      loopDate.setDate(loopDate.getDate() + 1);
     }
 
     // 4. Filter Conflicts
@@ -92,8 +94,7 @@ export class GetAvailableSlotsUseCase {
       AvailabilityBlockHours[block];
 
     for (let hour = startHour; hour < endHour; hour++) {
-      const slot = new Date(baseDate);
-      setHour(slot, hour);
+      const slot = setTime(baseDate, hour);
       slots.push(slot);
     }
 

@@ -6,7 +6,7 @@ import { ProfessionalEntity } from '../../../professionals/domain/entities/profe
 import { AvailabilityBlock } from '../../../professionals/domain/entities/professional-availability.entity';
 import { AppointmentStatus } from '../../domain/entities/appointment.entity';
 import { ProfessionalNotFoundError } from 'src/modules/professionals/domain/exceptions/professionals.error';
-import { setHour } from 'src/modules/shared/util/date.util';
+import { setTime } from 'src/modules/shared/util/date.util';
 import { WEEK_DAYS } from '../../domain/constants/availability-block.constants';
 
 describe('GetAvailableSlotsUseCase', () => {
@@ -84,8 +84,7 @@ describe('GetAvailableSlotsUseCase', () => {
       weekStart.toISOString(),
     );
 
-    const startDate = new Date(weekStart);
-    setHour(startDate);
+    const startDate = setTime(weekStart);
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + WEEK_DAYS);
 

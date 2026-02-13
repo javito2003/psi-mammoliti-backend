@@ -19,7 +19,7 @@ describe('GetProfessionalsUseCase', () => {
   });
 
   it('should return paginated professionals with provided filter and query', async () => {
-    const filter = { themeSlug: 'anxiety' };
+    const filter = { themeSlugs: ['anxiety'] };
     const query = {
       page: 3,
       limit: 5,

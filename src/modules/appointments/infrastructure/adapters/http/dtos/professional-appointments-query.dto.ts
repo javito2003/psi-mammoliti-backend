@@ -1,7 +1,7 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsISO8601, IsOptional } from 'class-validator';
 
 export class ProfessionalAppointmentsQueryDto {
   @IsOptional()
-  @IsString()
+  @IsISO8601()
   weekStart?: string;
 }

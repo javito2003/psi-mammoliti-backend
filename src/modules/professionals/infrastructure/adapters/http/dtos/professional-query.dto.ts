@@ -8,5 +8,5 @@ export class ProfessionalQueryDto extends PaginationQueryDto {
 
   @IsOptional()
   @IsString()
-  theme?: string;
+  themes?: string;
 }

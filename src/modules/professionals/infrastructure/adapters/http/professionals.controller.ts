@@ -12,8 +12,10 @@ export class ProfessionalsController {
 
   @Get()
   async getAll(@Query() query: ProfessionalQueryDto) {
-    const { theme, ...pagination } = query;
-    const filter = theme ? { themeSlug: theme } : undefined;
+    const { themes, ...pagination } = query;
+    const filter = themes
+      ? { themeSlugs: themes.split(',').map((s) => s.trim()) }
+      : undefined;
     const result = await this.getProfessionalsUseCase.execute(
       filter,
       pagination,
