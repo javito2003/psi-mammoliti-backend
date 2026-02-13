@@ -5,10 +5,15 @@ import { faker } from '@faker-js/faker';
 import { COOKIE_NAME } from '../../src/modules/auth/infrastructure/auth.constants';
 import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
 import { USER_PASSWORD_MIN_LENGTH } from '../../src/modules/users/domain/entities/user.entity';
+import {
+  USER_REPOSITORY,
+  type UserRepositoryPort,
+} from '../../src/modules/users/domain/ports/user.repository.port';
 
 describe('Auth - Refresh (e2e)', () => {
   let app: INestApplication;
   let refreshTokenCookie: string;
+  let userRepository: UserRepositoryPort;
 
   const userData: RegisterUserDto = {
     firstName: faker.person.firstName(),
@@ -20,6 +25,7 @@ describe('Auth - Refresh (e2e)', () => {
   beforeAll(async () => {
     const context = await createTestApp();
     app = context.app;
+    userRepository = app.get<UserRepositoryPort>(USER_REPOSITORY);
   });
 
   beforeEach(async () => {
@@ -51,6 +57,9 @@ describe('Auth - Refresh (e2e)', () => {
   });
 
   it('should refresh tokens successfully (201)', async () => {
+    const userBeforeRefresh = await userRepository.findByEmail(userData.email);
+    const tokenBeforeRefresh = userBeforeRefresh!.hashedRefreshToken;
+
     const response = await request(app.getHttpServer())
       .post('/auth/refresh')
       .set('Cookie', [refreshTokenCookie])
@@ -68,6 +77,10 @@ describe('Auth - Refresh (e2e)', () => {
 
     expect(newAccessCookie).toBeDefined();
     expect(newRefreshCookie).toBeDefined();
+
+    const userAfterRefresh = await userRepository.findByEmail(userData.email);
+    expect(userAfterRefresh!.hashedRefreshToken).toBeDefined();
+    expect(userAfterRefresh!.hashedRefreshToken).not.toBe(tokenBeforeRefresh);
   });
 
   it('should return 401 when refreshing without cookie', async () => {

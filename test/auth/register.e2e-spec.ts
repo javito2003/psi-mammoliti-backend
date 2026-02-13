@@ -7,13 +7,19 @@ import {
   USER_PASSWORD_MAX_LENGTH,
   USER_PASSWORD_MIN_LENGTH,
 } from '../../src/modules/users/domain/entities/user.entity';
+import {
+  USER_REPOSITORY,
+  type UserRepositoryPort,
+} from '../../src/modules/users/domain/ports/user.repository.port';
 
 describe('Auth - Register (e2e)', () => {
   let app: INestApplication;
+  let userRepository: UserRepositoryPort;
 
   beforeAll(async () => {
     const context = await createTestApp();
     app = context.app;
+    userRepository = app.get<UserRepositoryPort>(USER_REPOSITORY);
   });
 
   afterEach(async () => {
@@ -32,10 +38,19 @@ describe('Auth - Register (e2e)', () => {
   };
 
   it('should register a new user (201)', async () => {
-    return request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/auth/register')
       .send(userData)
       .expect(201);
+
+    const dbUser = await userRepository.findByEmail(userData.email);
+    expect(dbUser).not.toBeNull();
+    expect(dbUser!.firstName).toBe(userData.firstName);
+    expect(dbUser!.lastName).toBe(userData.lastName);
+    expect(dbUser!.email).toBe(userData.email);
+    expect(dbUser!.password).not.toBe(userData.password);
+    expect(dbUser!.createdAt).toBeInstanceOf(Date);
+    expect(dbUser!.updatedAt).toBeInstanceOf(Date);
   });
 
   it('should return 400 when registering with invalid email', async () => {

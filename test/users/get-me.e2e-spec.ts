@@ -63,10 +63,13 @@ describe('Users - Get Me (e2e)', () => {
         email: userData.email,
       }),
     );
-    expect(body.createdAt).toBeDefined();
-    expect(body.updatedAt).toBeDefined();
-    expect(body.id).toBeDefined();
+    expect(body.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
+    expect(new Date(body.createdAt).getTime()).not.toBeNaN();
+    expect(new Date(body.updatedAt).getTime()).not.toBeNaN();
     expect(body.password).toBeUndefined();
+    expect(body.hashedRefreshToken).toBeUndefined();
   });
 
   it('should return 401 without token', async () => {

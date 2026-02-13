@@ -5,10 +5,15 @@ import { faker } from '@faker-js/faker';
 import { COOKIE_NAME } from '../../src/modules/auth/infrastructure/auth.constants';
 import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
 import { USER_PASSWORD_MIN_LENGTH } from '../../src/modules/users/domain/entities/user.entity';
+import {
+  USER_REPOSITORY,
+  type UserRepositoryPort,
+} from '../../src/modules/users/domain/ports/user.repository.port';
 
 describe('Auth - Logout (e2e)', () => {
   let app: INestApplication;
   let accessTokenCookie: string;
+  let userRepository: UserRepositoryPort;
 
   const userData: RegisterUserDto = {
     firstName: faker.person.firstName(),
@@ -20,6 +25,7 @@ describe('Auth - Logout (e2e)', () => {
   beforeAll(async () => {
     const context = await createTestApp();
     app = context.app;
+    userRepository = app.get<UserRepositoryPort>(USER_REPOSITORY);
   });
 
   beforeEach(async () => {
@@ -67,6 +73,12 @@ describe('Auth - Logout (e2e)', () => {
 
     expect(accessCookie).toBeDefined();
     expect(refreshCookie).toBeDefined();
+    expect(accessCookie).toMatch(`${COOKIE_NAME.ACCESS}=;`);
+    expect(refreshCookie).toMatch(`${COOKIE_NAME.REFRESH}=;`);
+
+    const dbUser = await userRepository.findByEmail(userData.email);
+    expect(dbUser).not.toBeNull();
+    expect(dbUser!.hashedRefreshToken).toBeNull();
   });
 
   it('should return 401 (or 403) when logging out without access token', async () => {

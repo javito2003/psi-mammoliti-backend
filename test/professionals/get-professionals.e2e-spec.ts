@@ -27,19 +27,50 @@ describe('Professionals - Get All (e2e)', () => {
     await app.close();
   });
 
-  it('should return paginated professionals', async () => {
-    await professionalFactory.create();
-    await professionalFactory.create();
+  it('should respect pagination limit', async () => {
+    const promises = Array(15)
+      .fill(null)
+      .map(() => professionalFactory.create());
+    await Promise.all(promises);
 
     const response = await request(app.getHttpServer())
       .get('/professionals')
       .query({ page: 1, limit: 10 })
       .expect(200);
 
-    expect(response.body.data).toHaveLength(2);
-    expect(response.body.meta.total).toBe(2);
+    expect(response.body.data).toHaveLength(10);
+    expect(response.body.meta.total).toBe(15);
+    expect(response.body.meta.totalPages).toBe(2);
     expect(response.body.meta.page).toBe(1);
     expect(response.body.meta.limit).toBe(10);
+  });
+
+  it('should return correct page (offset)', async () => {
+    // Create 3 professionals sequentially to ensure order (if sorted by createdAt)
+    const p1 = await professionalFactory.create();
+    const p2 = await professionalFactory.create();
+    const p3 = await professionalFactory.create();
+
+    // Page 1 (limit 2)
+    const responsePage1 = await request(app.getHttpServer())
+      .get('/professionals')
+      .query({ page: 1, limit: 2 })
+      .expect(200);
+
+    // Page 2 (limit 2)
+    const responsePage2 = await request(app.getHttpServer())
+      .get('/professionals')
+      .query({ page: 2, limit: 2 })
+      .expect(200);
+
+    expect(responsePage1.body.data).toHaveLength(2);
+    expect(responsePage2.body.data).toHaveLength(1);
+
+    const idsPage1 = responsePage1.body.data.map((p: any) => p.id);
+    const idsPage2 = responsePage2.body.data.map((p: any) => p.id);
+
+    // Verify disjoint sets
+    expect(idsPage1).not.toContain(idsPage2[0]);
   });
 
   it('should filter by theme', async () => {
