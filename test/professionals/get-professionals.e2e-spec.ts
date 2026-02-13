@@ -96,7 +96,7 @@ describe('Professionals - Get All (e2e)', () => {
 
     const response = await request(getTestApp().getHttpServer())
       .get('/professionals')
-      .query({ theme: 'anxiety' })
+      .query({ themes: 'anxiety' })
       .expect(200);
 
     expect(response.body.data).toHaveLength(1);
