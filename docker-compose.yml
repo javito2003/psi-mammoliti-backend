@@ -33,6 +33,27 @@ services:
     networks:
       - psi_mammoliti_network
 
+  backend:
+    build: .
+    container_name: psi_mammoliti_backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: ${MYSQL_USER:-admin}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-password}
+      DB_NAME: ${MYSQL_DATABASE:-psi_mammoliti_db}
+      JWT_SECRET: ${JWT_SECRET:-secret}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - psi_mammoliti_network
+
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: psi_mammoliti_phpmyadmin

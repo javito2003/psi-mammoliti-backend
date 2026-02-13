@@ -1,0 +1,28 @@
+node_modules
+dist
+.git
+.gitignore
+
+# Tests
+test
+**/*.spec.ts
+coverage
+jest-e2e.json
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# Env
+.env
+.env.*
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Docs
+README.md
+CLAUDE.md
