@@ -143,19 +143,19 @@ export class SeedService {
           .map((slug) => savedThemes[slug])
           .filter((t) => !!t);
 
-        const availability = pData.availability.map(
-          (a) =>
-            new ProfessionalAvailabilityEntity({
-              id: uuidv4(),
-              dayOfWeek: a.dayOfWeek,
-              block: a.block,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }),
-        );
+        const professionalId = uuidv4();
+        const availability: ProfessionalAvailabilityEntity[] =
+          pData.availability.map((a) => ({
+            id: uuidv4(),
+            dayOfWeek: a.dayOfWeek,
+            block: a.block,
+            professionalId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }));
 
         const professional: ProfessionalEntity = {
-          id: uuidv4(),
+          id: professionalId,
           userId: user.id,
           bio: pData.bio,
           price: pData.price,

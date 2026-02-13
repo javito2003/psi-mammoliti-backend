@@ -1,6 +1,5 @@
 import { ProfessionalEntity } from 'src/modules/professionals/domain/entities/professional.entity';
 import { Professional } from './professional.schema';
-import { ProfessionalAvailabilityEntity } from 'src/modules/professionals/domain/entities/professional-availability.entity';
 import { ProfessionalAvailability } from './professional-availability.schema';
 import { Theme } from 'src/modules/themes/infrastructure/adapters/persistence/theme.schema';
 
@@ -27,15 +26,14 @@ export class ProfessionalMapper {
         name: t.name,
         slug: t.slug,
       })),
-      availability: schema.availability?.map(
-        (a) =>
-          new ProfessionalAvailabilityEntity({
-            id: a.id,
-            professionalId: a.professionalId,
-            dayOfWeek: a.dayOfWeek,
-            block: a.block,
-          }),
-      ),
+      availability: schema.availability?.map((a) => ({
+        id: a.id,
+        professionalId: a.professionalId,
+        dayOfWeek: a.dayOfWeek,
+        block: a.block,
+        createdAt: a.createdAt,
+        updatedAt: a.updatedAt,
+      })),
       createdAt: schema.createdAt,
       updatedAt: schema.updatedAt,
     };

@@ -4,15 +4,11 @@ export enum AvailabilityBlock {
   EVENING = 'EVENING',
 }
 
-export class ProfessionalAvailabilityEntity {
+export interface ProfessionalAvailabilityEntity {
   id: string;
   professionalId: string;
   dayOfWeek: number; // 0-6
   block: AvailabilityBlock;
   createdAt: Date;
   updatedAt: Date;
-
-  constructor(partial: Partial<ProfessionalAvailabilityEntity>) {
-    Object.assign(this, partial);
-  }
 }
