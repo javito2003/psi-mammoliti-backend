@@ -54,3 +54,47 @@ cp .env.test.example .env.test
 yarn test:e2e
 ```
 
+## Decisiones tecnicas principales
+* Utilice tecnologias como
+    * MySQL
+    * NestJS
+    * TypeORM
+    * Typescript
+* Arquitectura hexagonal
+* Validaciones de request (body, query, param)
+```
+modules/
+└── [module]/
+    ├── application/
+    │   └── use-cases/
+    ├── domain/
+    │   ├── entities/
+    │   ├── exceptions/
+    │   ├── ports/
+    │   └── services/
+    └── infrastructure/
+        └── adapters/
+            ├── http/
+            │   ├── controllers/
+            │   └── dtos/
+            └── persistence/
+                └── repository.ts
+
+```
+* Test
+    * Unit test
+    * E2E test
+
+### Que construi y que Asumi
+Construi un backend encargado de Mostrar profesionales, permitiendo filtrarlos y realizar una sesion. Ademas, se pueden listar las sesiones por usuario
+
+Asumi:
+* Solamente se puede crear y autenticarse como usuario.
+* Los turnos duran 1 hora
+* El profesional se le crea con un turno (Mañana, Tarde y Noche).
+* Los rango de los turnos estan predefinidos
+    * Mañana: 8 - 12
+    * Tarde: 13 - 17
+    * Noche: 18 - 22
+* Las sesiones no se pueden cancelar ni modificar
+* Los datos como: Profesionales, Tematicas son autogeneradas
