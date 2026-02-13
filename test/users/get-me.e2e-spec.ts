@@ -45,8 +45,9 @@ describe('Users - Get Me (e2e)', () => {
     await cleanupDatabase(app);
   });
 
-  afterAll(async () => {
+  afterAll(async (done) => {
     await app.close();
+    done();
   });
 
   it('should return user profile (200)', async () => {

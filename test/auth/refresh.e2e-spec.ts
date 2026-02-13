@@ -52,8 +52,9 @@ describe('Auth - Refresh (e2e)', () => {
     await cleanupDatabase(app);
   });
 
-  afterAll(async () => {
+  afterAll(async (done) => {
     await app.close();
+    done();
   });
 
   it('should refresh tokens successfully (201)', async () => {

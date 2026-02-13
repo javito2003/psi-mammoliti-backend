@@ -52,8 +52,9 @@ describe('Auth - Logout (e2e)', () => {
     await cleanupDatabase(app);
   });
 
-  afterAll(async () => {
+  afterAll(async (done) => {
     await app.close();
+    done();
   });
 
   it('should logout successfully (200)', async () => {

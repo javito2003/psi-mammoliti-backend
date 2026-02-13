@@ -40,8 +40,9 @@ describe('Auth - Login (e2e)', () => {
     await cleanupDatabase(app);
   });
 
-  afterAll(async () => {
+  afterAll(async (done) => {
     await app.close();
+    done();
   });
 
   it('should login successfully and set cookies (201)', async () => {

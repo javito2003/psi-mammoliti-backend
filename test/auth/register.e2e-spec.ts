@@ -26,8 +26,9 @@ describe('Auth - Register (e2e)', () => {
     await cleanupDatabase(app);
   });
 
-  afterAll(async () => {
+  afterAll(async (done) => {
     await app.close();
+    done();
   });
 
   const userData: RegisterUserDto = {

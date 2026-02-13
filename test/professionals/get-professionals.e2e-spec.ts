@@ -4,6 +4,9 @@ import { createTestApp, cleanupDatabase } from '../utils/e2e-setup';
 import { DataSource } from 'typeorm';
 import { ProfessionalFactory } from '../utils/factories/professional.factory';
 import { ThemeFactory } from '../utils/factories/theme.factory';
+import { PaginatedResponseDto } from '../../src/modules/shared/infrastructure/adapter/http/dtos/paginated-response.dto';
+import { ProfessionalEntity } from '../../src/modules/professionals/domain/entities/professional.entity';
+import { ProfessionalResponseDto } from '../../src/modules/professionals/infrastructure/adapters/http/dtos/professional-response.dto';
 
 describe('Professionals - Get All (e2e)', () => {
   let app: INestApplication;
@@ -23,15 +26,16 @@ describe('Professionals - Get All (e2e)', () => {
     await cleanupDatabase(app);
   });
 
-  afterAll(async () => {
+  afterAll(async (done) => {
     await app.close();
+    done();
   });
 
   it('should respect pagination limit', async () => {
     const promises = Array(15)
       .fill(null)
       .map(() => professionalFactory.create());
-    await Promise.all(promises);
+    const professionalsCreated = await Promise.all(promises);
 
     const response = await request(app.getHttpServer())
       .get('/professionals')
@@ -43,13 +47,33 @@ describe('Professionals - Get All (e2e)', () => {
     expect(response.body.meta.totalPages).toBe(2);
     expect(response.body.meta.page).toBe(1);
     expect(response.body.meta.limit).toBe(10);
+
+    professionalsCreated.forEach((prof) => {
+      const found = response.body.data.some(
+        (p: ProfessionalResponseDto) => p.id === prof.id,
+      ) as ProfessionalResponseDto;
+
+      expect(found).toBeTruthy();
+      expect(found).toEqual<ProfessionalResponseDto>({
+        id: prof.id,
+        firstName: prof.user.firstName,
+        lastName: prof.user.lastName,
+        bio: prof.bio,
+        price: prof.price,
+        timezone: prof.timezone,
+        themes: prof.themes.map((t) => ({
+          id: t.id,
+          name: t.name,
+        })),
+      });
+    });
   });
 
   it('should return correct page (offset)', async () => {
     // Create 3 professionals sequentially to ensure order (if sorted by createdAt)
-    const p1 = await professionalFactory.create();
-    const p2 = await professionalFactory.create();
-    const p3 = await professionalFactory.create();
+    await professionalFactory.create();
+    await professionalFactory.create();
+    await professionalFactory.create();
 
     // Page 1 (limit 2)
     const responsePage1 = await request(app.getHttpServer())
